@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pump Ton - TON Blockchain Token Platform</title>
+    <meta name="description" content="Создавай, торгуй и побеждай в мире мем-токенов на TON. Современная платформа для токенов с геймификацией, стримами и социальными возможностями.">
+    <meta name="keywords" content="TON, блокчейн, токены, мем-токены, DeFi, криптовалюта, pump.fun">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://anotheronesite.ru/">
+    <meta property="og:title" content="Pump Ton - TON Blockchain Token Platform">
+    <meta property="og:description" content="Создавай, торгуй и побеждай в мире мем-токенов на TON">
+    <meta property="og:image" content="https://anotheronesite.ru/og-image.png">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            animation: {
+              'gradient': 'gradient 3s ease infinite',
+              'glow': 'glow 2s ease-in-out infinite',
+              'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+            },
+            keyframes: {
+              gradient: {
+                '0%, 100%': { 'background-position': '0% 50%' },
+                '50%': { 'background-position': '100% 50%' }
+              },
+              glow: {
+                '0%, 100%': { 'box-shadow': '0 0 20px rgba(168, 85, 247, 0.4)' },
+                '50%': { 'box-shadow': '0 0 30px rgba(236, 72, 153, 0.6)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide React Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/esm/lucide.js"></script>
+    
+    <style>
+      :root {
+        --background: #0a0a0a;
+        --foreground: #fafafa;
+        --card: #111111;
+        --card-foreground: #fafafa;
+        --popover: #111111;
+        --popover-foreground: #fafafa;
+        --primary: #8b5cf6;
+        --primary-foreground: #ffffff;
+        --secondary: #1f1f1f;
+        --secondary-foreground: #f5f5f5;
+        --muted: #1f1f1f;
+        --muted-foreground: #a3a3a3;
+        --accent: #1f1f1f;
+        --accent-foreground: #f5f5f5;
+        --destructive: #ef4444;
+        --destructive-foreground: #ffffff;
+        --border: #262626;
+        --input: #262626;
+        --ring: #8b5cf6;
+        --radius: 0.5rem;
+      }
+
+      * {
+        border-color: hsl(var(--border));
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #0a0a0a;
+        color: #fafafa;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      .animate-gradient {
+        background-size: 200% 200%;
+        animation: gradient 3s ease infinite;
+      }
+
+      .animate-glow {
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .card {
+        background-color: #111111;
+        border: 1px solid #262626;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+        transition: all 0.2s ease;
+      }
+
+      .card:hover {
+        border-color: #8b5cf6;
+        box-shadow: 0 4px 12px 0 rgb(139 92 246 / 0.15);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: 1px solid transparent;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        min-height: 2.5rem;
+      }
+
+      .btn-primary {
+        background-color: #8b5cf6;
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background-color: #7c3aed;
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background-color: transparent;
+        border: 1px solid #8b5cf6;
+        color: #8b5cf6;
+      }
+
+      .btn-secondary:hover {
+        background-color: #8b5cf6;
+        color: #ffffff;
+      }
+
+      .input {
+        display: flex;
+        height: 2.5rem;
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #262626;
+        background-color: #111111;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+        color: #ffffff;
+      }
+
+      .input:focus {
+        outline: 2px solid #8b5cf6;
+        outline-offset: 2px;
+        border-color: #8b5cf6;
+      }
+
+      .input::placeholder {
+        color: #71717a;
+      }
+
+      .textarea {
+        display: flex;
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #262626;
+        background-color: #111111;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+        color: #ffffff;
+        resize: vertical;
+        min-height: 4rem;
+      }
+
+      .textarea:focus {
+        outline: 2px solid #8b5cf6;
+        outline-offset: 2px;
+        border-color: #8b5cf6;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+      }
+
+      .badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+
+      .badge-danger {
+        background-color: #fecaca;
+        color: #991b1b;
+      }
+
+      .badge-primary {
+        background-color: #ddd6fe;
+        color: #5b21b6;
+      }
+
+      .progress {
+        width: 100%;
+        height: 0.5rem;
+        background-color: #262626;
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background-color: #8b5cf6;
+        transition: width 0.3s ease;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+
+      .tabs-list {
+        display: flex;
+        background-color: #1f1f1f;
+        border-radius: 0.5rem;
+        padding: 0.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .tabs-trigger {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: #71717a;
+      }
+
+      .tabs-trigger.active {
+        background-color: #8b5cf6;
+        color: #ffffff;
+      }
+
+      .carousel {
+        position: relative;
+        width: 100%;
+      }
+
+      .carousel-content {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+      }
+
+      .carousel-item {
+        flex-shrink: 0;
+        width: 100%;
+      }
+
+      @media (min-width: 768px) {
+        .carousel-item {
+          width: calc(50% - 0.5rem);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .carousel-item {
+          width: calc(33.333% - 0.667rem);
+        }
+      }
+
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .backdrop-blur-xl {
+        backdrop-filter: blur(24px);
+      }
+
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Custom scrollbar for better UX */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #1f1f1f;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #8b5cf6;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #7c3aed;
+      }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel" data-type="module">
+      const { useState, useEffect, useRef } = React;
+      const { createElement: h } = React;
+
+      // Иконки (упрощенная версия без внешней библиотеки)
+      const Icons = {
+        Home: '🏠', Search: '🔍', Filter: '⚙️', Trending: '📈', Heart: '❤️', 
+        Star: '⭐', Flame: '🔥', Users: '👥', DollarSign: '💰', 
+        ArrowRight: '→', ArrowLeft: '←', Settings: '⚙️', Shield: '🛡️',
+        Upload: '📤', ImageIcon: '🖼️', Wallet: '👛', CheckCircle: '✅',
+        AlertCircle: '⚠️', Rocket: '🚀', Zap: '⚡', Lock: '🔒',
+        Unlock: '🔓', Activity: '📊', MessageSquare: '💬', Share2: '📤',
+        ThumbsUp: '👍', Coins: '🪙', Info: 'ℹ️', AlertTriangle: '⚠️',
+        Calendar: '📅', Clock: '⏰', Eye: '👁️', Play: '▶️',
+        Pause: '⏸️', Volume: '🔊', MoreHorizontal: '⋯', ChevronDown: '⌄',
+        Plus: '+', Minus: '-', X: '×', Check: '✓'
+      };
+
+      // Компонент иконки
+      const Icon = ({ name, className = "w-4 h-4", ...props }) => {
+        return React.createElement('span', {
+          className: className,
+          ...props
+        }, Icons[name] || '?');
+      };
+
+      // Мок данные
+      const mockTokens = [
+        {
+          id: '1',
+          name: 'Pepe Rocket',
+          ticker: 'PEPETON',
+          price: 0.0234,
+          change24h: 125.4,
+          change1h: 8.2,
+          change7d: 245.6,
+          marketCap: 1250000,
+          volume: 450000,
+          holders: 3420,
+          transactions24h: 892,
+          riskLevel: 'medium',
+          trending: true,
+          memeScore: 95,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '2 дня назад',
+          ownerShare: 15.2,
+          auditPassed: true,
+          boostCount: 12,
+          likes: 3420,
+          postsCount: 45,
+          isVerified: true
+        },
+        {
+          id: '2',
+          name: 'Moon Doge',
+          ticker: 'MDOGE',
+          price: 0.0876,
+          change24h: -15.2,
+          change1h: 2.1,
+          change7d: -8.4,
+          marketCap: 890000,
+          volume: 320000,
+          holders: 2150,
+          transactions24h: 567,
+          riskLevel: 'high',
+          trending: false,
+          memeScore: 82,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '5 дней назад',
+          ownerShare: 45.8,
+          auditPassed: false,
+          boostCount: 3,
+          likes: 1890,
+          postsCount: 23,
+          isVerified: false
+        },
+        {
+          id: '3',
+          name: 'Shiba TON',
+          ticker: 'SHITON',
+          price: 0.156,
+          change24h: 67.8,
+          change1h: 12.4,
+          change7d: 189.2,
+          marketCap: 2100000,
+          volume: 780000,
+          holders: 5670,
+          transactions24h: 1245,
+          riskLevel: 'low',
+          trending: true,
+          memeScore: 98,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '1 неделя назад',
+          ownerShare: 8.7,
+          auditPassed: true,
+          boostCount: 28,
+          likes: 8920,
+          postsCount: 67,
+          isVerified: true
+        },
+        {
+          id: '4',
+          name: 'Wojak Finance',
+          ticker: 'WOJAK',
+          price: 0.0045,
+          change24h: 234.5,
+          change1h: 45.2,
+          change7d: 456.8,
+          marketCap: 670000,
+          volume: 290000,
+          holders: 1890,
+          transactions24h: 334,
+          riskLevel: 'high',
+          trending: true,
+          memeScore: 88,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '12 часов назад',
+          ownerShare: 78.3,
+          auditPassed: false,
+          boostCount: 7,
+          likes: 2340,
+          postsCount: 12,
+          isVerified: false
+        },
+        {
+          id: '5',
+          name: 'Chad Token',
+          ticker: 'CHAD',
+          price: 0.234,
+          change24h: 12.3,
+          change1h: 1.8,
+          change7d: 34.7,
+          marketCap: 1560000,
+          volume: 540000,
+          holders: 4230,
+          transactions24h: 678,
+          riskLevel: 'low',
+          trending: false,
+          memeScore: 76,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '3 дня назад',
+          ownerShare: 22.1,
+          auditPassed: true,
+          boostCount: 15,
+          likes: 4560,
+          postsCount: 89,
+          isVerified: true
+        },
+        {
+          id: '6',
+          name: 'Gigachad',
+          ticker: 'GIGA',
+          price: 0.089,
+          change24h: -8.4,
+          change1h: -2.3,
+          change7d: -15.6,
+          marketCap: 430000,
+          volume: 180000,
+          holders: 980,
+          transactions24h: 156,
+          riskLevel: 'medium',
+          trending: false,
+          memeScore: 71,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=400',
+          createdAt: '1 день назад',
+          ownerShare: 67.4,
+          auditPassed: true,
+          boostCount: 2,
+          likes: 890,
+          postsCount: 8,
+          isVerified: false
+        }
+      ];
+
+      const newsItems = [
+        {
+          id: 1,
+          title: 'TON Blockchain достиг 10M транзакций!',
+          image: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400',
+          date: '2 часа назад'
+        },
+        {
+          id: 2,
+          title: 'Новый рекорд: PEPETON вырос на 500% за день',
+          image: 'https://images.unsplash.com/photo-1623002126996-a38b8a41f4f3?w=400',
+          date: '5 часов назад'
+        },
+        {
+          id: 3,
+          title: 'Pump Ton запускает NFT бейджи для холдеров',
+          image: 'https://images.unsplash.com/photo-1604079628040-94301bb21b91?w=400',
+          date: '1 день назад'
+        }
+      ];
+
+      // Навигация
+      const Navigation = ({ currentPage, onNavigate, theme, onThemeToggle }) => {
+        return h('nav', {
+          className: "sticky top-0 z-50 border-b border-purple-500/20 bg-black/50 backdrop-blur-xl px-4 py-3"
+        }, h('div', {
+          className: "max-w-7xl mx-auto flex items-center justify-between"
+        }, [
+          h('div', {
+            className: "flex items-center space-x-8",
+            key: 'nav-left'
+          }, [
+            h('button', {
+              onClick: () => onNavigate('home'),
+              className: "text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer hover:scale-105 transition-transform"
+            }, 'Pump Ton'),
+            h('div', {
+              className: "hidden md:flex items-center space-x-6",
+              key: 'nav-links'
+            }, [
+              h('button', {
+                onClick: () => onNavigate('home'),
+                className: `px-3 py-2 rounded-lg transition-colors ${
+                      currentPage === 'home' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white'
+                } cursor-pointer`
+              }, 'Главная'),
+              h('button', {
+                onClick: () => onNavigate('create'),
+                className: `px-3 py-2 rounded-lg transition-colors ${
+                      currentPage === 'create' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white'
+                } cursor-pointer`
+              }, 'Создать токен'),
+              h('button', {
+                onClick: () => onNavigate('streams'),
+                className: `px-3 py-2 rounded-lg transition-colors ${
+                      currentPage === 'streams' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white'
+                } cursor-pointer`
+              }, 'Стримы'),
+              h('button', {
+                onClick: () => onNavigate('profile'),
+                className: `px-3 py-2 rounded-lg transition-colors ${
+                  currentPage === 'profile' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white'
+                } cursor-pointer`
+              }, 'Профиль')
+            ])
+          ]),
+          h('div', {
+            className: "flex items-center space-x-4",
+            key: 'nav-right'
+          }, [
+            h('button', {
+              onClick: onThemeToggle,
+              className: "p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 cursor-pointer transition-colors"
+            }, theme === 'dark' ? '☀️' : '🌙')
+          ])
+        ]));
+      };
+
+      // Компонент главной страницы
+      const Home = ({ onNavigateToToken, onNavigate }) => {
+        const [sortBy, setSortBy] = useState('trending');
+        const [searchQuery, setSearchQuery] = useState('');
+        const [filterRisk, setFilterRisk] = useState('all');
+        const [filterAudit, setFilterAudit] = useState('all');
+
+        const sortedAndFilteredTokens = mockTokens
+          .filter(token => {
+            const matchesSearch = token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              token.ticker.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesRisk = filterRisk === 'all' || token.riskLevel === filterRisk;
+            const matchesAudit = filterAudit === 'all' || 
+              (filterAudit === 'audited' && token.auditPassed) ||
+              (filterAudit === 'not-audited' && !token.auditPassed);
+            return matchesSearch && matchesRisk && matchesAudit;
+          })
+          .sort((a, b) => {
+            switch (sortBy) {
+              case 'price': return b.price - a.price;
+              case 'volume': return b.volume - a.volume;
+              case 'marketCap': return b.marketCap - a.marketCap;
+              case 'holders': return b.holders - a.holders;
+              case 'likes': return b.likes - a.likes;
+              default: return b.change24h - a.change24h;
+            }
+          });
+
+        const topTokensWeek = mockTokens.slice(0, 3);
+        const topByLikes = [...mockTokens].sort((a, b) => b.likes - a.likes).slice(0, 3);
+        const recordOfDay = mockTokens.find(t => t.change24h === Math.max(...mockTokens.map(t => t.change24h)));
+
+        return h('div', {
+          className: "min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950"
+        }, [
+          // Hero Section
+          h('section', {
+            className: "relative overflow-hidden px-4 pt-8 pb-12 md:pt-16 md:pb-20",
+            key: 'hero'
+          }, [
+            h('div', {
+              className: "absolute inset-0 bg-cover bg-center opacity-10",
+              style: { backgroundImage: "url('https://images.unsplash.com/photo-1623002126996-a38b8a41f4f3?w=1200')" }
+            }),
+            h('div', {
+              className: "absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/20 to-gray-950"
+            }),
+            h('div', {
+              className: "relative max-w-7xl mx-auto text-center"
+            }, [
+              h('div', {
+                className: "inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-full mb-6 backdrop-blur-sm"
+              }, [
+                h(Icon, { name: 'Star', className: "w-4 h-4 text-purple-400 flex-shrink-0" }),
+                h('span', {
+                  className: "text-purple-300 text-sm"
+                }, 'TON Blockchain Ecosystem')
+              ]),
+              h('h1', {
+                className: "text-4xl md:text-7xl mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient"
+              }, 'Pump Ton'),
+              h('p', {
+                className: "text-lg md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto"
+              }, 'Создавай, торгуй и побеждай в мире мем-токенов на TON'),
+              h('div', {
+                className: "flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              }, [
+                h('button', {
+                  onClick: () => onNavigate('create'),
+                  className: "btn btn-primary px-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 animate-glow"
+                }, [
+                  h(Icon, { name: 'Flame', className: "w-5 h-5 mr-2 flex-shrink-0" }),
+                  'Создать токен'
+                ]),
+                h('button', {
+                  onClick: () => onNavigate('streams'),
+                  className: "btn btn-secondary px-8 py-6 text-lg"
+                }, [
+                  h(Icon, { name: 'Play', className: "w-5 h-5 mr-2 flex-shrink-0" }),
+                  'Смотреть стримы'
+                ])
+              ]),
+              h('div', {
+                className: "grid grid-cols-3 gap-4 mt-12 max-w-3xl mx-auto"
+              }, [
+                h('div', {
+                  className: "bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 hover:scale-105 transition-transform"
+                }, [
+                  h(Icon, { name: 'DollarSign', className: "w-8 h-8 text-green-400 mx-auto mb-2" }),
+                  h('div', { className: "text-2xl truncate" }, '$12.4M'),
+                  h('div', { className: "text-sm text-gray-400 truncate" }, '24ч Объем')
+                ]),
+                h('div', {
+                  className: "bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 hover:scale-105 transition-transform"
+                }, [
+                  h(Icon, { name: 'Users', className: "w-8 h-8 text-blue-400 mx-auto mb-2" }),
+                  h('div', { className: "text-2xl truncate" }, '45.2K'),
+                  h('div', { className: "text-sm text-gray-400 truncate" }, 'Активных трейдеров')
+                ]),
+                h('div', {
+                  className: "bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-xl p-4 hover:scale-105 transition-transform"
+                }, [
+                  h(Icon, { name: 'Flame', className: "w-8 h-8 text-orange-400 mx-auto mb-2" }),
+                  h('div', { className: "text-2xl truncate" }, '234'),
+                  h('div', { className: "text-sm text-gray-400 truncate" }, 'Новых токенов')
+                ])
+              ])
+            ])
+          ]),
+
+          // News Section
+          h('section', {
+            className: "px-4 py-8 max-w-7xl mx-auto",
+            key: 'news'
+          }, [
+            h('h2', {
+              className: "text-2xl mb-6 flex items-center gap-2"
+            }, [
+              h(Icon, { name: 'Star', className: "w-6 h-6 text-purple-400 flex-shrink-0" }),
+              'Новости и события'
+            ]),
+            h('div', {
+              className: "carousel"
+            }, h('div', {
+              className: "carousel-content scrollbar-hide"
+            }, newsItems.map(news => h('div', {
+              className: "carousel-item",
+              key: news.id
+            }, h('div', {
+              className: "card bg-gray-900/50 border-purple-500/20 overflow-hidden hover:border-purple-500/40 transition-all duration-300 cursor-pointer"
+            }, [
+              h('div', {
+                className: "relative h-48 overflow-hidden"
+              }, [
+                h('img', {
+                  src: news.image,
+                  alt: news.title,
+                  className: "w-full h-full object-cover"
+                }),
+                h('div', {
+                  className: "absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"
+                })
+              ]),
+              h('div', {
+                className: "p-4"
+              }, [
+                h('p', {
+                  className: "text-sm text-gray-400 mb-2"
+                }, news.date),
+                h('h3', {
+                  className: "text-lg line-clamp-2"
+                }, news.title)
+              ])
+            ]))))
+          ]),
+
+          // Widgets Section
+          h('section', {
+            className: "px-4 py-8 max-w-7xl mx-auto",
+            key: 'widgets'
+          }, h('div', {
+            className: "grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
+          }, [
+            h('div', {
+              className: "card bg-gradient-to-br from-gray-900/80 to-gray-900/50 border-purple-500/20 p-6"
+            }, [
+              h('h3', {
+                className: "text-lg mb-4 flex items-center gap-2"
+              }, [
+                h(Icon, { name: 'Star', className: "w-5 h-5 text-yellow-400 flex-shrink-0" }),
+                'Топ недели'
+              ]),
+              h('div', {
+                className: "space-y-3"
+              }, topTokensWeek.map((token, idx) => h('div', {
+                key: token.id,
+                className: "flex items-center gap-3 p-2 hover:bg-gray-800/30 rounded-lg cursor-pointer",
+                onClick: () => onNavigateToToken(token.id)
+              }, [
+                h('div', {
+                  className: "w-6 h-6 bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-full flex items-center justify-center text-xs font-bold"
+                }, idx + 1),
+                h('img', {
+                  src: token.image,
+                  alt: token.name,
+                  className: "w-8 h-8 rounded-full flex-shrink-0"
+                }),
+                h('div', {
+                  className: "min-w-0 flex-1"
+                }, [
+                  h('div', { className: "truncate" }, token.ticker),
+                  h('div', {
+                    className: "text-xs text-green-400 truncate"
+                  }, `+${token.change24h.toFixed(1)}%`)
+                ])
+              ])))
+            ]),
+            h('div', {
+              className: "card bg-gradient-to-br from-gray-900/80 to-gray-900/50 border-purple-500/20 p-6"
+            }, [
+              h('h3', {
+                className: "text-lg mb-4 flex items-center gap-2"
+              }, [
+                h(Icon, { name: 'Flame', className: "w-5 h-5 text-orange-400 flex-shrink-0" }),
+                'Рекорд дня'
+              ]),
+              recordOfDay && h('div', {
+                className: "text-center",
+                onClick: () => onNavigateToToken(recordOfDay.id)
+              }, [
+                h('img', {
+                  src: recordOfDay.image,
+                  alt: recordOfDay.name,
+                  className: "w-16 h-16 rounded-full mx-auto mb-3"
+                }),
+                h('h4', {
+                  className: "text-xl truncate"
+                }, recordOfDay.name),
+                h('div', {
+                  className: "text-2xl text-green-400 font-bold"
+                }, `+${recordOfDay.change24h.toFixed(1)}%`),
+                h('div', {
+                  className: "text-sm text-gray-400"
+                }, recordOfDay.ticker)
+              ])
+            ]),
+            h('div', {
+              className: "card bg-gradient-to-br from-gray-900/80 to-gray-900/50 border-purple-500/20 p-6"
+            }, [
+              h('h3', {
+                className: "text-lg mb-4 flex items-center gap-2"
+              }, [
+                h(Icon, { name: 'Heart', className: "w-5 h-5 text-pink-400 flex-shrink-0" }),
+                'Топ по лайкам'
+              ]),
+              h('div', {
+                className: "space-y-3"
+              }, topByLikes.map((token, idx) => h('div', {
+                key: token.id,
+                className: "flex items-center gap-3 p-2 hover:bg-gray-800/30 rounded-lg cursor-pointer",
+                onClick: () => onNavigateToToken(token.id)
+              }, [
+                h('div', {
+                  className: "w-6 h-6 bg-gradient-to-r from-pink-600 to-pink-700 rounded-full flex items-center justify-center text-xs font-bold"
+                }, idx + 1),
+                h('img', {
+                  src: token.image,
+                  alt: token.name,
+                  className: "w-8 h-8 rounded-full flex-shrink-0"
+                }),
+                h('div', {
+                  className: "min-w-0 flex-1"
+                }, [
+                  h('div', { className: "truncate" }, token.ticker),
+                  h('div', {
+                    className: "text-xs text-pink-400 flex items-center gap-1 truncate"
+                  }, [
+                    h(Icon, { name: 'Heart', className: "w-3 h-3 flex-shrink-0" }),
+                    token.likes
+                  ])
+                ])
+              ])))
+            ])
+          ])),
+
+          // Search and Filters
+          h('section', {
+            className: "px-4 py-8 max-w-7xl mx-auto",
+            key: 'filters'
+          }, h('div', {
+            className: "flex flex-col md:flex-row gap-4 items-center justify-between mb-8"
+          }, [
+            h('div', {
+              className: "flex-1 max-w-md"
+            }, h('input', {
+              type: "text",
+              placeholder: "Поиск токенов...",
+              value: searchQuery,
+              onChange: (e) => setSearchQuery(e.target.value),
+              className: "input w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+            })),
+            h('div', {
+              className: "flex gap-2 flex-wrap"
+            }, [
+              h('button', {
+                onClick: () => setSortBy('trending'),
+                className: `px-4 py-2 rounded-lg text-sm ${
+                  sortBy === 'trending' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300'
+                } cursor-pointer`
+              }, 'Тренд'),
+              h('button', {
+                onClick: () => setSortBy('marketCap'),
+                className: `px-4 py-2 rounded-lg text-sm ${
+                  sortBy === 'marketCap' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300'
+                } cursor-pointer`
+              }, 'Капитал'),
+              h('button', {
+                onClick: () => setSortBy('holders'),
+                className: `px-4 py-2 rounded-lg text-sm ${
+                  sortBy === 'holders' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300'
+                } cursor-pointer`
+              }, 'Холдеры')
+            ])
+          ])),
+
+          // Tokens Section
+          h('section', {
+            className: "px-4 py-8 max-w-7xl mx-auto",
+            key: 'tokens'
+          }, [
+            h('div', {
+              className: "flex justify-between items-center mb-8"
+            }, [
+              h('h2', {
+                className: "text-3xl font-bold"
+              }, 'Топ токены'),
+              h('span', {
+                className: "text-gray-400"
+              }, `${sortedAndFilteredTokens.length} токенов`)
+            ]),
+            h('div', {
+              className: "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            }, sortedAndFilteredTokens.map(token => h('div', {
+              key: token.id,
+              className: "card bg-gray-900 border-gray-800 hover:border-purple-500 transition-colors cursor-pointer",
+              onClick: () => onNavigateToToken(token.id)
+            }, [
+              h('div', {
+                className: "flex items-center justify-between mb-4"
+              }, [
+                h('div', {
+                  className: "flex items-center space-x-3"
+                }, [
+                  h('div', {
+                    className: "w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
+                  }, h('span', {
+                    className: "text-white font-bold text-lg"
+                  }, token.ticker[0])),
+                  h('div', {}, [
+                    h('h3', {
+                      className: "font-semibold text-lg flex items-center gap-2"
+                    }, [
+                      token.name,
+                      token.isVerified && h('span', {
+                        className: "text-blue-400"
+                      }, '✓')
+                    ]),
+                    h('p', {
+                      className: "text-gray-400 text-sm"
+                    }, token.ticker)
+                  ])
+                ]),
+                h('span', {
+                  className: `px-2 py-1 rounded text-sm font-medium ${
+                          token.change24h > 0 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+                  }`
+                }, `${token.change24h > 0 ? '+' : ''}${token.change24h.toFixed(1)}%`)
+              ]),
+              h('div', {
+                className: "space-y-2"
+              }, [
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Цена:'),
+                  h('span', { className: "font-mono" }, `$${token.price.toFixed(4)}`)
+                ]),
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Капитализация:'),
+                  h('span', { className: "font-mono" }, `$${(token.marketCap / 1000).toFixed(0)}K`)
+                ]),
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Холдеры:'),
+                  h('span', { className: "font-mono" }, token.holders.toLocaleString())
+                ]),
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Лайки:'),
+                  h('span', { className: "font-mono" }, token.likes)
+                ])
+              ]),
+              h('div', {
+                className: "mt-4 flex items-center justify-between"
+              }, [
+                h('span', {
+                  className: `px-2 py-1 rounded text-xs ${
+                    token.riskLevel === 'low' ? 'bg-green-900 text-green-300' :
+                    token.riskLevel === 'medium' ? 'bg-yellow-900 text-yellow-300' :
+                    'bg-red-900 text-red-300'
+                  }`
+                }, `Риск: ${token.riskLevel === 'low' ? 'Низкий' : token.riskLevel === 'medium' ? 'Средний' : 'Высокий'}`),
+                token.auditPassed && h('span', {
+                  className: "px-2 py-1 rounded text-xs bg-blue-900 text-blue-300"
+                }, 'Аудит ✓')
+              ])
+            ]))
+          ])
+        ]);
+      };
+
+      // Продолжение компонентов будет в следующей части из-за ограничений длины...
+      
+      // Пока создам упрощенные версии остальных компонентов
+      const CreateToken = ({ onNavigate }) => {
+        const [step, setStep] = useState(1);
+        const [tokenData, setTokenData] = useState({
+          name: '',
+          ticker: '',
+          supply: '1000000',
+          description: '',
+          decimals: 9,
+          antiWhale: false,
+          autoBurn: false,
+          liquidityLock: false,
+          auditRequested: false,
+          boostPackage: null
+        });
+
+        const feeStructure = {
+          networkFee: 0.5,
+          platformFee: 0.1,
+          serviceFee: 0.05,
+          auditFee: tokenData.auditRequested ? 2.0 : 0,
+          boostFee: tokenData.boostPackage === 'basic' ? 1.0 : 
+                    tokenData.boostPackage === 'premium' ? 5.0 :
+                    tokenData.boostPackage === 'vip' ? 15.0 : 0,
+        };
+
+        const totalFee = Object.values(feeStructure).reduce((sum, fee) => sum + fee, 0);
+
+        return h('div', {
+          className: "min-h-screen bg-gray-950 text-white py-12 px-4"
+        }, h('div', {
+          className: "max-w-4xl mx-auto"
+        }, [
+          h('div', {
+            className: "text-center mb-8"
+          }, [
+            h('h1', {
+              className: "text-4xl font-bold mb-4"
+            }, 'Создание токена'),
+            h('div', {
+              className: "flex justify-center space-x-4"
+            }, [1, 2, 3, 4].map(i => h('div', {
+              key: i,
+              className: `w-8 h-8 rounded-full flex items-center justify-center ${
+                      i <= step ? 'bg-purple-600' : 'bg-gray-700'
+              }`
+            }, i)))
+          ]),
+          
+          h('div', {
+            className: "card bg-gray-900 border-gray-800"
+          }, step === 1 && h('div', {}, [
+            h('h2', {
+              className: "text-2xl font-semibold mb-6"
+            }, 'Основная информация'),
+            h('div', {
+              className: "space-y-6"
+            }, [
+              h('div', {}, [
+                h('label', {
+                  className: "block text-sm font-medium mb-2"
+                }, 'Название токена'),
+                h('input', {
+                  type: "text",
+                  className: "input w-full bg-gray-800 border-gray-700 text-white",
+                  placeholder: "Введите название",
+                  value: tokenData.name,
+                  onChange: (e) => setTokenData({...tokenData, name: e.target.value})
+                })
+              ]),
+              h('div', {}, [
+                h('label', {
+                  className: "block text-sm font-medium mb-2"
+                }, 'Тикер'),
+                h('input', {
+                  type: "text",
+                  className: "input w-full bg-gray-800 border-gray-700 text-white",
+                  placeholder: "Введите тикер",
+                  value: tokenData.ticker,
+                  onChange: (e) => setTokenData({...tokenData, ticker: e.target.value})
+                })
+              ]),
+              h('div', {}, [
+                h('label', {
+                  className: "block text-sm font-medium mb-2"
+                }, 'Описание'),
+                h('textarea', {
+                  className: "textarea w-full bg-gray-800 border-gray-700 text-white",
+                  placeholder: "Опишите ваш токен",
+                  value: tokenData.description,
+                  onChange: (e) => setTokenData({...tokenData, description: e.target.value})
+                })
+              ]),
+              h('button', {
+                onClick: () => setStep(2),
+                className: "btn btn-primary w-full",
+                disabled: !tokenData.name || !tokenData.ticker
+              }, 'Далее')
+            ])
+          ]),
+
+          step === 2 && h('div', {}, [
+            h('h2', {
+              className: "text-2xl font-semibold mb-6"
+            }, 'Параметры токена'),
+            h('div', {
+              className: "space-y-6"
+            }, [
+              h('div', {}, [
+                h('label', {
+                  className: "block text-sm font-medium mb-2"
+                }, 'Общее количество (Supply)'),
+                h('input', {
+                  type: "text",
+                  className: "input w-full bg-gray-800 border-gray-700 text-white",
+                  placeholder: "1000000",
+                  value: tokenData.supply,
+                  onChange: (e) => setTokenData({...tokenData, supply: e.target.value})
+                })
+              ]),
+              h('div', {
+                className: "bg-purple-900/20 border border-purple-500/30 rounded-lg p-4"
+              }, [
+                h('h3', {
+                  className: "font-semibold mb-2"
+                }, 'Стоимость создания'),
+                h('div', {
+                  className: "space-y-2 text-sm"
+                }, [
+                  h('div', {
+                    className: "flex justify-between"
+                  }, [
+                    h('span', {}, 'Комиссия сети TON:'),
+                    h('span', { className: "font-mono" }, '1.5 TON')
+                  ]),
+                  h('div', {
+                    className: "flex justify-between font-bold text-lg border-t border-purple-500/30 pt-2"
+                  }, [
+                    h('span', {}, 'Итого:'),
+                    h('span', { className: "font-mono" }, `${totalFee.toFixed(1)} TON (~$${(totalFee * 1.75).toFixed(2)})`)
+                  ])
+                ])
+              ]),
+              h('div', {
+                className: "flex gap-4"
+              }, [
+                h('button', {
+                  onClick: () => setStep(1),
+                  className: "btn border border-gray-600 text-gray-300 flex-1"
+                }, 'Назад'),
+                h('button', {
+                  onClick: () => setStep(4),
+                  className: "btn btn-primary flex-1 bg-gradient-to-r from-purple-600 to-pink-600"
+                }, 'Создать токен')
+              ])
+            ])
+          ]),
+
+          step === 4 && h('div', {
+            className: "text-center"
+          }, [
+            h('div', {
+              className: "w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6"
+            }, h('span', { className: "text-2xl" }, '✓')),
+            h('h2', {
+              className: "text-2xl font-semibold mb-4"
+            }, 'Токен создан!'),
+            h('p', {
+              className: "text-gray-300 mb-6"
+            }, [
+              'Ваш токен ',
+              h('span', {
+                className: "font-bold text-purple-400"
+              }, `${tokenData.name} (${tokenData.ticker})`),
+              ' успешно создан и развернут в блокчейне TON.'
+            ]),
+            h('div', {
+              className: "flex gap-4 justify-center"
+            }, [
+              h('button', {
+                onClick: () => onNavigate('home'),
+                className: "btn btn-primary"
+              }, 'Вернуться на главную'),
+              h('button', {
+                onClick: () => {
+                  setStep(1);
+                  setTokenData({
+                    name: '', ticker: '', supply: '1000000', description: '',
+                    decimals: 9, antiWhale: false, autoBurn: false, liquidityLock: false,
+                    auditRequested: false, boostPackage: null
+                  });
+                },
+                className: "btn border border-purple-600 text-purple-400"
+              }, 'Создать еще токен')
+            ])
+          ])
+        ]));
+      };
+
+      const Streams = ({ onNavigate }) => {
+        const streams = [
+          {
+            id: 1,
+            title: 'Анонс нового токена PEPE',
+            type: 'live',
+            viewers: 342,
+            duration: '2:15:43',
+            thumbnail: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400'
+          },
+          {
+            id: 2,
+            title: 'Анализ рынка TON',
+            type: 'recorded',
+            viewers: 1200,
+            duration: '1:45:20',
+            time: '2 часа назад',
+            thumbnail: 'https://images.unsplash.com/photo-1623002126996-a38b8a41f4f3?w=400'
+          },
+          {
+            id: 3,
+            title: 'AMA с разработчиками',
+            type: 'recorded',
+            viewers: 2800,
+            duration: '2:30:15',
+            time: '1 день назад',
+            thumbnail: 'https://images.unsplash.com/photo-1604079628040-94301bb21b91?w=400'
+          }
+        ];
+
+        return h('div', {
+          className: "min-h-screen bg-gray-950 text-white py-12 px-4"
+        }, h('div', {
+          className: "max-w-7xl mx-auto"
+        }, [
+          h('div', {
+            className: "text-center mb-12"
+          }, [
+            h('h1', {
+              className: "text-4xl font-bold mb-4"
+            }, 'Live Стримы'),
+            h('p', {
+              className: "text-xl text-gray-300"
+            }, 'Смотрите прямые эфиры и записи')
+          ]),
+          
+          h('div', {
+            className: "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          }, streams.map(stream => h('div', {
+            key: stream.id,
+            className: "card bg-gray-900 border-gray-800 hover:border-purple-500 transition-colors cursor-pointer"
+          }, [
+            h('div', {
+              className: "relative aspect-video bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg mb-4 overflow-hidden"
+            }, [
+              h('img', {
+                src: stream.thumbnail,
+                alt: stream.title,
+                className: "w-full h-full object-cover"
+              }),
+              stream.type === 'live' && h('div', {
+                className: "absolute top-2 left-2 flex items-center gap-1 bg-red-600 text-white px-2 py-1 rounded text-sm font-medium"
+              }, ['🔴', 'LIVE']),
+              h('div', {
+                className: "absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm"
+              }, stream.duration)
+            ]),
+            h('h3', {
+              className: "font-semibold text-lg mb-2 line-clamp-2"
+            }, stream.title),
+            h('div', {
+              className: "flex items-center justify-between"
+            }, [
+              h('span', {
+                className: "text-gray-400 text-sm"
+              }, stream.type === 'live' ? `${stream.viewers} зрителей` : `${stream.viewers} просмотров`),
+              h('button', {
+                className: "btn btn-primary text-sm px-4 py-2"
+              }, stream.type === 'live' ? 'Смотреть' : 'Воспроизвести')
+            ])
+          ])),
+          
+          h('div', {
+            className: "text-center mt-12"
+          }, h('button', {
+            onClick: () => onNavigate('create'),
+            className: "btn btn-primary px-8 py-3 text-lg"
+          }, 'Начать стрим'))
+        ]));
+      };
+
+      const Profile = ({ onNavigate }) => {
+        const userStats = {
+          createdTokens: 3,
+          totalValue: 12500,
+          rank: 156,
+          achievements: 12,
+          level: 8
+        };
+
+        const achievements = [
+          { id: 1, name: 'Первый токен', description: 'Создайте свой первый токен', unlocked: true, icon: '🚀' },
+          { id: 2, name: 'Трендер', description: 'Получите 100 лайков', unlocked: true, icon: '📈' },
+          { id: 3, name: 'Сообщество', description: 'Соберите 1000 холдеров', unlocked: false, icon: '👥' }
+        ];
+
+        return h('div', {
+          className: "min-h-screen bg-gray-950 text-white py-12 px-4"
+        }, h('div', {
+          className: "max-w-4xl mx-auto"
+        }, [
+          h('div', {
+            className: "text-center mb-12"
+          }, [
+            h('div', {
+              className: "w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+            }, h('span', { className: "text-3xl" }, '👤')),
+            h('h1', {
+              className: "text-3xl font-bold mb-2"
+            }, 'Мой профиль'),
+            h('p', {
+              className: "text-gray-400"
+            }, 'Уровень ' + userStats.level + ' • Ранг #' + userStats.rank)
+          ]),
+          
+          h('div', {
+            className: "grid gap-6 md:grid-cols-2"
+          }, [
+            h('div', {
+              className: "card bg-gray-900 border-gray-800"
+            }, [
+              h('h3', {
+                className: "font-semibold text-lg mb-4"
+              }, 'Статистика'),
+              h('div', {
+                className: "space-y-3"
+              }, [
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Создано токенов:'),
+                  h('span', { className: "font-mono" }, userStats.createdTokens)
+                ]),
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Общая стоимость:'),
+                  h('span', { className: "font-mono" }, `$${userStats.totalValue.toLocaleString()}`)
+                ]),
+                h('div', {
+                  className: "flex justify-between"
+                }, [
+                  h('span', { className: "text-gray-400" }, 'Достижения:'),
+                  h('span', { className: "font-mono" }, userStats.achievements)
+                ])
+              ])
+            ]),
+            
+            h('div', {
+              className: "card bg-gray-900 border-gray-800"
+            }, [
+              h('h3', {
+                className: "font-semibold text-lg mb-4"
+              }, 'Достижения'),
+              h('div', {
+                className: "space-y-3"
+              }, achievements.map(achievement => h('div', {
+                key: achievement.id,
+                className: `flex items-center gap-3 p-3 rounded-lg ${
+                  achievement.unlocked ? 'bg-purple-900/20 border border-purple-500/30' : 'bg-gray-800/50'
+                }`
+              }, [
+                h('span', { className: "text-2xl" }, achievement.icon),
+                h('div', {
+                  className: "flex-1"
+                }, [
+                  h('h4', {
+                    className: "font-medium"
+                  }, achievement.name),
+                  h('p', {
+                    className: "text-sm text-gray-400"
+                  }, achievement.description)
+                ]),
+                achievement.unlocked && h('span', {
+                  className: "text-green-400"
+                }, '✓')
+              ])))
+            ])
+          ])
+        ]));
+      };
+
+      // Компонент Analytics для графиков и аналитики
+      const Analytics = ({ tokenId }) => {
+        const [chartType, setChartType] = useState('line');
+        const [timeframe, setTimeframe] = useState('24h');
+        
+        const mockPriceData = [
+          { timestamp: Date.now() - 3600000 * 24, price: 0.0189, volume: 120000, marketCap: 950000 },
+          { timestamp: Date.now() - 3600000 * 20, price: 0.0198, volume: 156000, marketCap: 980000 },
+          { timestamp: Date.now() - 3600000 * 16, price: 0.0212, volume: 189000, marketCap: 1050000 },
+          { timestamp: Date.now() - 3600000 * 12, price: 0.0205, volume: 134000, marketCap: 1020000 },
+          { timestamp: Date.now() - 3600000 * 8, price: 0.0223, volume: 245000, marketCap: 1120000 },
+          { timestamp: Date.now() - 3600000 * 4, price: 0.0247, volume: 312000, marketCap: 1230000 },
+          { timestamp: Date.now(), price: 0.0234, volume: 267000, marketCap: 1180000 },
+        ];
+        
+        const currentPrice = mockPriceData[mockPriceData.length - 1]?.price || 0;
+        const prevPrice = mockPriceData[0]?.price || 0;
+        const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
+
+        return React.createElement('div', {
+          className: "space-y-6"
+        }, [
+          React.createElement('div', {
+            key: 'header',
+            className: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+          }, [
+            React.createElement('div', { key: 'title' }, [
+              React.createElement('h2', {
+                key: 'h2',
+                className: "text-2xl font-bold mb-2"
+              }, 'Аналитика и графики'),
+              React.createElement('div', {
+                key: 'price',
+                className: "flex items-center gap-4"
+              }, [
+                React.createElement('span', {
+                  key: 'price-value',
+                  className: "text-3xl font-mono"
+                }, `$${currentPrice.toFixed(4)}`),
+                React.createElement('div', {
+                  key: 'change',
+                  className: `flex items-center gap-1 ${priceChange >= 0 ? 'text-green-400' : 'text-red-400'}`
+                }, [
+                  React.createElement('span', { key: 'change-text' }, `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`)
+                ])
+              ])
+            ])
+          ]),
+          
+          React.createElement('div', {
+            key: 'chart',
+            className: "bg-gray-900 border border-purple-500/20 rounded-lg p-6"
+          }, [
+            React.createElement('div', {
+              key: 'chart-content',
+              className: "h-80 flex items-center justify-center text-gray-400"
+            }, [
+              React.createElement('div', {
+                key: 'chart-placeholder',
+                className: "text-center"
+              }, [
+                React.createElement('div', {
+                  key: 'icon',
+                  className: "w-12 h-12 mx-auto mb-2 opacity-50"
+                }, '📈'),
+                React.createElement('p', { key: 'text' }, 'Интерактивные графики'),
+                React.createElement('p', {
+                  key: 'subtext',
+                  className: "text-sm"
+                }, 'В разработке')
+              ])
+            ])
+          ]),
+          
+          React.createElement('div', {
+            key: 'metrics',
+            className: "grid grid-cols-2 md:grid-cols-4 gap-4"
+          }, [
+            React.createElement('div', {
+              key: 'cap',
+              className: "bg-gray-900 border border-purple-500/20 rounded-lg p-4"
+            }, [
+              React.createElement('div', {
+                key: 'cap-header',
+                className: "flex items-center gap-2 mb-2"
+              }, [
+                React.createElement('span', {
+                  key: 'cap-icon',
+                  className: "text-purple-400"
+                }, '💰'),
+                React.createElement('span', {
+                  key: 'cap-label',
+                  className: "text-sm text-gray-400"
+                }, 'Капитализация')
+              ]),
+              React.createElement('div', {
+                key: 'cap-value',
+                className: "text-xl font-mono"
+              }, `$${(currentPrice * 1000000).toLocaleString()}`)
+            ]),
+            
+            React.createElement('div', {
+              key: 'volume',
+              className: "bg-gray-900 border border-purple-500/20 rounded-lg p-4"
+            }, [
+              React.createElement('div', {
+                key: 'vol-header',
+                className: "flex items-center gap-2 mb-2"
+              }, [
+                React.createElement('span', {
+                  key: 'vol-icon',
+                  className: "text-blue-400"
+                }, '📊'),
+                React.createElement('span', {
+                  key: 'vol-label',
+                  className: "text-sm text-gray-400"
+                }, '24ч Объем')
+              ]),
+              React.createElement('div', {
+                key: 'vol-value',
+                className: "text-xl font-mono"
+              }, `$${mockPriceData[mockPriceData.length - 1]?.volume.toLocaleString()}`)
+            ])
+          ])
+        ]);
+      };
+
+      // Компонент SocialFeed для постов и социального взаимодействия
+      const SocialFeed = ({ tokenId }) => {
+        const [posts, setPosts] = useState([
+          {
+            id: '1',
+            author: 'CryptoKing',
+            avatar: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=100',
+            content: 'PEPETON взлетает! 🚀 Только что добавил ликвидность на 50K TON. Держитесь крепко, мы идем к луне! 💎🙌',
+            timestamp: '10 минут назад',
+            likes: 342,
+            comments: 23,
+            shares: 15,
+            isLiked: false,
+            tags: ['#PEPETON', '#TON', '#Pump']
+          }
+        ]);
+
+        const handleLikePost = (postId) => {
+          setPosts(posts.map(post => 
+            post.id === postId 
+              ? { 
+                  ...post, 
+                  isLiked: !post.isLiked, 
+                  likes: post.isLiked ? post.likes - 1 : post.likes + 1 
+                }
+              : post
+          ));
+        };
+
+        return React.createElement('div', {
+          className: "space-y-6"
+        }, [
+          React.createElement('div', {
+            key: 'header',
+            className: "text-center"
+          }, [
+            React.createElement('h2', {
+              key: 'title',
+              className: "text-2xl font-bold mb-2"
+            }, 'Сообщество токена'),
+            React.createElement('p', {
+              key: 'subtitle',
+              className: "text-gray-400"
+            }, 'Обсуждения и новости')
+          ]),
+          
+          React.createElement('div', {
+            key: 'posts',
+            className: "space-y-4"
+          }, posts.map(post => 
+            React.createElement('div', {
+              key: post.id,
+              className: "bg-gray-900 border border-purple-500/20 rounded-lg p-6"
+            }, [
+              React.createElement('div', {
+                key: 'post-header',
+                className: "flex items-start justify-between mb-4"
+              }, [
+                React.createElement('div', {
+                  key: 'author-info',
+                  className: "flex items-center gap-3"
+                }, [
+                  React.createElement('img', {
+                    key: 'avatar',
+                    src: post.avatar,
+                    alt: post.author,
+                    className: "w-12 h-12 rounded-full"
+                  }),
+                  React.createElement('div', { key: 'details' }, [
+                    React.createElement('div', {
+                      key: 'name',
+                      className: "font-semibold"
+                    }, post.author),
+                    React.createElement('div', {
+                      key: 'time',
+                      className: "text-sm text-gray-400"
+                    }, post.timestamp)
+                  ])
+                ])
+              ]),
+              
+              React.createElement('div', {
+                key: 'content',
+                className: "mb-4"
+              }, [
+                React.createElement('p', {
+                  key: 'text',
+                  className: "text-gray-100 leading-relaxed mb-3"
+                }, post.content),
+                React.createElement('div', {
+                  key: 'tags',
+                  className: "flex flex-wrap gap-2"
+                }, post.tags.map((tag, index) => 
+                  React.createElement('span', {
+                    key: index,
+                    className: "text-purple-400 text-sm cursor-pointer hover:text-purple-300 transition-colors"
+                  }, tag)
+                ))
+              ]),
+              
+              React.createElement('div', {
+                key: 'actions',
+                className: "flex items-center justify-between pt-4 border-t border-gray-700"
+              }, [
+                React.createElement('div', {
+                  key: 'interactions',
+                  className: "flex items-center gap-6"
+                }, [
+                  React.createElement('button', {
+                    key: 'like',
+                    onClick: () => handleLikePost(post.id),
+                    className: `flex items-center gap-2 transition-colors ${
+                      post.isLiked ? 'text-pink-400' : 'text-gray-400 hover:text-pink-400'
+                    }`
+                  }, [
+                    React.createElement('span', { key: 'heart' }, post.isLiked ? '❤️' : '🤍'),
+                    React.createElement('span', { key: 'count' }, post.likes)
+                  ]),
+                  React.createElement('button', {
+                    key: 'comment',
+                    className: "flex items-center gap-2 text-gray-400 hover:text-blue-400 transition-colors"
+                  }, [
+                    React.createElement('span', { key: 'icon' }, '💬'),
+                    React.createElement('span', { key: 'count' }, post.comments)
+                  ]),
+                  React.createElement('button', {
+                    key: 'share',
+                    className: "flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors"
+                  }, [
+                    React.createElement('span', { key: 'icon' }, '📤'),
+                    React.createElement('span', { key: 'count' }, post.shares)
+                  ])
+                ])
+              ])
+            ])
+          ))
+        ]);
+      };
+
+      // Компонент BoostSystem для продвижения токенов
+      const BoostSystem = ({ tokenId, tokenName }) => {
+        const [selectedPackage, setSelectedPackage] = useState('');
+        const [showPayment, setShowPayment] = useState(false);
+
+        const boostPackages = [
+          {
+            id: 'basic',
+            name: 'Basic Boost',
+            price: 10,
+            duration: 24,
+            features: [
+              'Показ в топ-виджете',
+              'Всплывающие уведомления',
+              'Приоритет в листинге',
+              'Базовый аналитический отчет'
+            ],
+            color: 'bg-blue-600'
+          },
+          {
+            id: 'premium',
+            name: 'Premium Boost',
+            price: 50,
+            duration: 72,
+            features: [
+              'Все возможности Basic',
+              'Размещение на главной странице',
+              'Push-уведомления пользователям',
+              'Социальные сети интеграция',
+              'Детальная аналитика',
+              'Приоритетная поддержка'
+            ],
+            color: 'bg-purple-600'
+          },
+          {
+            id: 'vip',
+            name: 'VIP Boost',
+            price: 150,
+            duration: 168,
+            features: [
+              'Все возможности Premium',
+              'Эксклюзивное размещение на баннере',
+              'Уведомления всем активным пользователям',
+              'Автоматические посты в соцсетях',
+              'Персональный менеджер',
+              'Кампания в мессенджерах',
+              'Отчет о ROI'
+            ],
+            color: 'bg-gradient-to-r from-purple-600 to-pink-600'
+          }
+        ];
+
+        const handleBoostPurchase = (packageId) => {
+          setSelectedPackage(packageId);
+          setShowPayment(true);
+        };
+
+        const handlePaymentConfirm = () => {
+          setShowPayment(false);
+          setSelectedPackage('');
+          alert(`Boost активирован! Ваш токен будет продвигаться 🚀`);
+        };
+
+        return React.createElement('div', {
+          className: "space-y-6"
+        }, [
+          React.createElement('div', {
+            key: 'header',
+            className: "text-center"
+          }, [
+            React.createElement('h2', {
+              key: 'title',
+              className: "text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+            }, 'Продвижение токенов'),
+            React.createElement('p', {
+              key: 'subtitle',
+              className: "text-gray-400"
+            }, 'Увеличьте видимость вашего токена с помощью продвинутых рекламных кампаний')
+          ]),
+          
+          React.createElement('div', {
+            key: 'packages',
+            className: "grid gap-6 md:grid-cols-3"
+          }, boostPackages.map(pkg => 
+            React.createElement('div', {
+              key: pkg.id,
+              className: `bg-gray-900 border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/50 transition-all cursor-pointer ${selectedPackage === pkg.id ? 'border-purple-500 bg-purple-500/10' : ''}`
+            }, [
+              React.createElement('div', {
+                key: 'package-header',
+                className: "text-center mb-6"
+              }, [
+                React.createElement('h4', {
+                  key: 'name',
+                  className: "text-xl font-bold mb-2"
+                }, pkg.name),
+                React.createElement('div', {
+                  key: 'price',
+                  className: "text-3xl font-bold text-purple-400 mb-2"
+                }, [
+                  React.createElement('span', { key: 'amount' }, pkg.price),
+                  React.createElement('span', {
+                    key: 'currency',
+                    className: "text-lg text-gray-400 ml-1"
+                  }, 'TON')
+                ]),
+                React.createElement('div', {
+                  key: 'duration',
+                  className: "text-sm text-gray-400"
+                }, `на ${pkg.duration} часов`)
+              ]),
+              
+              React.createElement('div', {
+                key: 'features',
+                className: "space-y-3 mb-6"
+              }, pkg.features.slice(0, 3).map((feature, index) => 
+                React.createElement('div', {
+                  key: index,
+                  className: "flex items-center gap-2"
+                }, [
+                  React.createElement('span', {
+                    key: 'check',
+                    className: "text-green-400"
+                  }, '✓'),
+                  React.createElement('span', {
+                    key: 'text',
+                    className: "text-sm"
+                  }, feature)
+                ])
+              )),
+              
+              React.createElement('button', {
+                key: 'button',
+                onClick: () => handleBoostPurchase(pkg.id),
+                className: `w-full ${pkg.color} hover:opacity-90 text-white py-3 rounded-lg transition-all`
+              }, 'Выбрать пакет')
+            ])
+          ))
+        ]);
+      };
+
+      // Компонент страницы токена с новыми табами
+      const TokenPage = ({ tokenId, onNavigate }) => {
+        const [activeTab, setActiveTab] = useState('analytics');
+        const [isFavorite, setIsFavorite] = useState(false);
+
+        const mockToken = {
+          id: tokenId || '1',
+          name: 'Pepe Rocket',
+          ticker: 'PEPETON',
+          price: 0.0234,
+          change24h: 125.4,
+          marketCap: 1250000,
+          volume: 450000,
+          holders: 3420,
+          image: 'https://images.unsplash.com/photo-1691085272761-eb72dc7dd3f5?w=200'
+        };
+
+        return React.createElement('div', {
+          className: "min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950 pb-8"
+        }, [
+          // Header
+          React.createElement('div', {
+            key: 'header',
+            className: "sticky top-0 z-40 backdrop-blur-xl bg-gray-950/80 border-b border-purple-500/20 px-4 py-4"
+          }, React.createElement('div', {
+            className: "max-w-7xl mx-auto flex items-center justify-between"
+          }, [
+            React.createElement('button', {
+              key: 'back-btn',
+              onClick: () => onNavigate('home'),
+              className: "flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            }, [
+              React.createElement('span', { key: 'arrow' }, '←'),
+              'Назад'
+            ]),
+            React.createElement('div', {
+              key: 'actions',
+              className: "flex gap-2"
+            }, [
+              React.createElement('button', {
+                key: 'favorite',
+                onClick: () => setIsFavorite(!isFavorite),
+                className: `p-2 rounded-full transition-colors ${isFavorite ? 'text-pink-400' : 'text-gray-400 hover:text-pink-400'}`
+              }, isFavorite ? '❤️' : '🤍'),
+              React.createElement('button', {
+                key: 'share',
+                className: "p-2 text-gray-400 hover:text-white transition-colors"
+              }, '📤')
+            ])
+          ])),
+
+          // Main Content
+          React.createElement('div', {
+            key: 'content',
+            className: "max-w-7xl mx-auto px-4 py-8"
+          }, React.createElement('div', {
+            className: "grid grid-cols-1 lg:grid-cols-3 gap-6"
+          }, [
+            // Token Info
+            React.createElement('div', {
+              key: 'token-info',
+              className: "lg:col-span-2 space-y-6"
+            }, [
+              React.createElement('div', {
+                key: 'token-header',
+                className: "bg-gradient-to-br from-gray-900/80 to-gray-900/50 border border-purple-500/20 rounded-lg p-6"
+              }, [
+                React.createElement('div', {
+                  key: 'token-details',
+                  className: "flex items-start justify-between gap-4 mb-6"
+                }, [
+                  React.createElement('div', {
+                    key: 'token-main',
+                    className: "flex items-center gap-4 min-w-0 flex-1"
+                  }, [
+                    React.createElement('div', {
+                      key: 'avatar-container',
+                      className: "relative flex-shrink-0"
+                    }, [
+                      React.createElement('div', {
+                        className: "absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-xl opacity-50"
+                      }),
+                      React.createElement('img', {
+                        src: mockToken.image,
+                        alt: mockToken.name,
+                        className: "relative w-20 h-20 rounded-full border-2 border-purple-500/50"
+                      })
+                    ]),
+                    React.createElement('div', {
+                      key: 'token-text',
+                      className: "min-w-0 flex-1"
+                    }, [
+                      React.createElement('h1', {
+                        key: 'name',
+                        className: "text-3xl mb-1 flex items-center gap-2"
+                      }, [
+                        React.createElement('span', {
+                          className: "truncate"
+                        }, mockToken.name),
+                        React.createElement('span', {
+                          className: "bg-orange-500/20 text-orange-400 border border-orange-500/50 px-2 py-1 rounded text-sm font-medium whitespace-nowrap flex-shrink-0"
+                        }, '🔥 Trending')
+                      ]),
+                      React.createElement('p', {
+                        key: 'ticker',
+                        className: "text-gray-400 text-lg truncate"
+                      }, mockToken.ticker)
+                    ])
+                  ]),
+                  React.createElement('div', {
+                    key: 'price-info',
+                    className: "text-right flex-shrink-0"
+                  }, [
+                    React.createElement('div', {
+                      key: 'price',
+                      className: "text-2xl font-bold mb-1"
+                    }, `$${mockToken.price.toFixed(4)}`),
+                    React.createElement('div', {
+                      key: 'change',
+                      className: `text-sm ${mockToken.change24h > 0 ? 'text-green-400' : 'text-red-400'}`
+                    }, `${mockToken.change24h > 0 ? '+' : ''}${mockToken.change24h.toFixed(2)}%`)
+                  ])
+                ])
+              ]),
+
+              // Tabs Section
+              React.createElement('div', {
+                key: 'tabs-section',
+                className: "bg-gray-900/50 border border-purple-500/20 rounded-lg"
+              }, [
+                React.createElement('div', {
+                  key: 'tabs-header',
+                  className: "grid grid-cols-4 bg-gray-900/50"
+                }, [
+                  React.createElement('button', {
+                    key: 'analytics-tab',
+                    onClick: () => setActiveTab('analytics'),
+                    className: `px-4 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'analytics' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-400/10' : 'text-gray-400 hover:text-white'
+                    }`
+                  }, 'Аналитика'),
+                  React.createElement('button', {
+                    key: 'trade-tab',
+                    onClick: () => setActiveTab('trade'),
+                    className: `px-4 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'trade' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-400/10' : 'text-gray-400 hover:text-white'
+                    }`
+                  }, 'Сделки'),
+                  React.createElement('button', {
+                    key: 'social-tab',
+                    onClick: () => setActiveTab('social'),
+                    className: `px-4 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'social' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-400/10' : 'text-gray-400 hover:text-white'
+                    }`
+                  }, 'Сообщество'),
+                  React.createElement('button', {
+                    key: 'boost-tab',
+                    onClick: () => setActiveTab('boost'),
+                    className: `px-4 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'boost' ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-400/10' : 'text-gray-400 hover:text-white'
+                    }`
+                  }, 'Продвижение')
+                ]),
+
+                React.createElement('div', {
+                  key: 'tabs-content',
+                  className: "p-6"
+                }, 
+                  activeTab === 'analytics' && React.createElement(Analytics, { tokenId: tokenId }),
+                  activeTab === 'trade' && React.createElement('div', {
+                    className: "space-y-4"
+                  }, [
+                    React.createElement('h3', {
+                      key: 'trade-title',
+                      className: "text-lg mb-4"
+                    }, 'Последние транзакции'),
+                    React.createElement('div', {
+                      key: 'transactions',
+                      className: "space-y-3"
+                    }, [
+                      React.createElement('div', {
+                        key: 'tx1',
+                        className: "flex items-center justify-between gap-3 p-3 bg-gray-950/50 rounded-lg"
+                      }, [
+                        React.createElement('span', {
+                          key: 'tx-type',
+                          className: "px-2 py-1 rounded text-sm bg-green-500/20 text-green-400"
+                        }, '🟢 Покупка'),
+                        React.createElement('div', {
+                          key: 'tx-details',
+                          className: "flex-1"
+                        }, [
+                          React.createElement('div', {}, '1,500 PEPETON'),
+                          React.createElement('div', {
+                            className: "text-sm text-gray-400"
+                          }, '0x7f3a...b92c')
+                        ]),
+                        React.createElement('div', {
+                          key: 'tx-price',
+                          className: "text-right"
+                        }, [
+                          React.createElement('div', {}, '$0.0527'),
+                          React.createElement('div', {
+                            className: "text-sm text-gray-400"
+                          }, '2 мин назад')
+                        ])
+                      ])
+                    ])
+                  ]),
+                  activeTab === 'social' && React.createElement(SocialFeed, { tokenId: tokenId }),
+                  activeTab === 'boost' && React.createElement(BoostSystem, { tokenId: tokenId, tokenName: mockToken.ticker })
+                )
+              ])
+            ]),
+
+            // Sidebar
+            React.createElement('div', {
+              key: 'sidebar',
+              className: "space-y-6"
+            }, [
+              React.createElement('div', {
+                key: 'trading-panel',
+                className: "bg-gradient-to-br from-gray-900/80 to-gray-900/50 border border-purple-500/20 rounded-lg p-6 sticky top-24"
+              }, [
+                React.createElement('h3', {
+                  key: 'trading-title',
+                  className: "text-xl mb-6"
+                }, 'Торговля'),
+                React.createElement('div', {
+                  key: 'trade-buttons',
+                  className: "grid grid-cols-2 gap-2 mb-4"
+                }, [
+                  React.createElement('button', {
+                    key: 'buy-btn',
+                    className: "px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium"
+                  }, 'Купить'),
+                  React.createElement('button', {
+                    key: 'sell-btn',
+                    className: "px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium"
+                  }, 'Продать')
+                ]),
+                React.createElement('div', {
+                  key: 'stats',
+                  className: "space-y-4"
+                }, [
+                  React.createElement('div', {
+                    key: 'stat1',
+                    className: "flex justify-between"
+                  }, [
+                    React.createElement('span', {
+                      className: "text-gray-400"
+                    }, 'Капитализация:'),
+                    React.createElement('span', {
+                      className: "font-mono"
+                    }, `$${(mockToken.marketCap / 1000).toFixed(0)}K`)
+                  ]),
+                  React.createElement('div', {
+                    key: 'stat2',
+                    className: "flex justify-between"
+                  }, [
+                    React.createElement('span', {
+                      className: "text-gray-400"
+                    }, 'Холдеры:'),
+                    React.createElement('span', {
+                      className: "font-mono"
+                    }, mockToken.holders.toLocaleString())
+                  ]),
+                  React.createElement('div', {
+                    key: 'stat3',
+                    className: "flex justify-between"
+                  }, [
+                    React.createElement('span', {
+                      className: "text-gray-400"
+                    }, 'Объем 24ч:'),
+                    React.createElement('span', {
+                      className: "font-mono"
+                    }, `$${(mockToken.volume / 1000).toFixed(0)}K`)
+                  ])
+                ])
+              ])
+            ])
+          ]))
+        ]);
+      };
+
+      // Главный компонент приложения
+      const App = () => {
+        const [currentPage, setCurrentPage] = useState('home');
+        const [selectedTokenId, setSelectedTokenId] = useState(null);
+        const [theme, setTheme] = useState('dark');
+
+        useEffect(() => {
+          if (theme === 'dark') {
+            document.body.classList.add('dark');
+          } else {
+            document.body.classList.remove('dark');
+          }
+        }, [theme]);
+
+        const navigateToToken = (tokenId) => {
+          console.log('Navigating to token:', tokenId);
+          setSelectedTokenId(tokenId);
+          setCurrentPage('token');
+          console.log('Current page should be set to token');
+        };
+
+        const renderPage = () => {
+          console.log('Rendering page:', currentPage);
+          switch (currentPage) {
+            case 'token':
+              return React.createElement(TokenPage, { tokenId: selectedTokenId, onNavigate: setCurrentPage });
+            case 'create':
+              return React.createElement(CreateToken, { onNavigate: setCurrentPage });
+            case 'streams':
+              return React.createElement(Streams, { onNavigate: setCurrentPage });
+            case 'reels':
+              return React.createElement(Reels, { onNavigate: setCurrentPage });
+            case 'profile':
+              return React.createElement(Profile, { onNavigate: setCurrentPage });
+            case 'history':
+              return React.createElement(History, { onNavigate: setCurrentPage });
+            case 'leaderboard':
+              return React.createElement(Leaderboard, { onNavigate: setCurrentPage });
+            case 'home':
+            default:
+              return React.createElement(Home, { onNavigateToToken: navigateToToken, onNavigate: setCurrentPage });
+          }
+        };
+
+        const currentPageComponent = renderPage();
+
+        return React.createElement('div', {
+          className: `min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'}`
+        }, [
+          React.createElement(Navigation, {
+            key: 'navigation',
+            currentPage: currentPage,
+            onNavigate: setCurrentPage,
+            theme: theme,
+            onThemeToggle: () => setTheme(theme === 'dark' ? 'light' : 'dark')
+          }),
+          React.createElement('main', {
+            key: 'main',
+            className: "pb-20 md:pb-0"
+          }, currentPageComponent)
+        ]);
+      };
+
+      // Рендер приложения
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(App));
+    </script>
+</body>
+</html>

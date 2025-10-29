@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pump Ton - TON Blockchain Token Platform</title>
+    <meta name="description" content="Создавай, торгуй и побеждай в мире мем-токенов на TON. Современная платформа для токенов с геймификацией.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TON Connect UI -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <!-- TON SDK -->
+    <script src="https://unpkg.com/@ton/ton@13.11.2/dist/web/index.js"></script>
+    <script src="https://unpkg.com/@ton/core@0.56.0/dist/index.js"></script>
+    <!-- Socket.IO для real-time обновлений -->
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554'
+              }
+            },
+            animation: {
+              'gradient': 'gradient 3s ease infinite',
+              'glow': 'glow 2s ease-in-out infinite',
+              'float': 'float 3s ease-in-out infinite',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+            },
+            keyframes: {
+              gradient: {
+                '0%, 100%': { 'background-position': '0% 50%' },
+                '50%': { 'background-position': '100% 50%' }
+              },
+              glow: {
+                '0%, 100%': { 'box-shadow': '0 0 20px rgba(59, 130, 246, 0.4)' },
+                '50%': { 'box-shadow': '0 0 30px rgba(59, 130, 246, 0.6)' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-10px)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #0a0f1e 0%, #1a1f35 25%, #2a1f4a 50%, #1f2937 75%, #0f172a 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        color: white;
+        position: relative;
+        overflow-x: hidden;
+      }
+      
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      
+      /* Animated background particles */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+          radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .animate-gradient {
+        background-size: 200% 200%;
+        animation: gradient 3s ease infinite;
+      }
+
+      .animate-glow {
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      .glass-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s;
+      }
+      
+      .glass-card:hover::before {
+        left: 100%;
+      }
+      
+      .glass-card-hover {
+        transition: all 0.3s ease;
+      }
+      
+      .glass-card-hover:hover {
+        transform: translateY(-8px);
+        border-color: rgba(59, 130, 246, 0.3);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        background-size: 200% 200%;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 14px;
+        font-weight: 600;
+        transition: all 0.4s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      }
+      
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+      
+      .btn-primary:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5), 0 5px 15px rgba(139, 92, 246, 0.3);
+        background-position: 100% 0;
+      }
+      
+      .btn-primary:active {
+        transform: translateY(-1px) scale(0.98);
+      }
+      
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      
+      .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+      
+      .input-field:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .input-field::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      
+      .nav-link {
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+      }
+      
+      .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .nav-link.active {
+        color: white;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      }
+      
+      .page {
+        display: none;
+      }
+      
+      .page.active {
+        display: block;
+      }
+      
+      .logo-container {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 3s ease infinite;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      }
+      
+      .logo-container::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(45deg, #6366f1, #8b5cf6, #d946ef, #6366f1);
+        background-size: 400% 400%;
+        animation: gradientShift 3s ease infinite;
+        border-radius: 16px;
+        opacity: 0.5;
+        filter: blur(8px);
+        z-index: -1;
+      }
+      
+      .logo-rocket {
+        width: 24px;
+        height: 24px;
+        fill: white;
+        transform: rotate(45deg);
+      }
+      
+      .hero-gradient {
+        background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 30%, #ec4899 60%, #f43f5e 100%);
+        background-size: 200% 200%;
+        animation: gradientText 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.5));
+      }
+      
+      .stats-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 28px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6, #d946ef);
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+      }
+      
+      .stats-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+      
+      .stats-card:hover {
+        transform: translateY(-6px) scale(1.03);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
+      }
+      
+      .stats-card:hover::after {
+        opacity: 1;
+      }
+      
+      .token-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .token-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #6366f1, #8b5cf6, #d946ef, transparent);
+        opacity: 0;
+        transition: left 0.6s ease, opacity 0.3s ease;
+      }
+      
+      .token-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.15), transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      
+      .token-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 
+          0 25px 50px rgba(99, 102, 241, 0.2),
+          0 10px 20px rgba(139, 92, 246, 0.15),
+          inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      }
+      
+      .token-card:hover::before {
+        opacity: 1;
+        left: 100%;
+      }
+      
+      .token-card:hover::after {
+        opacity: 1;
+      }
+      
+      .gradient-text {
+        background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 50%, #ec4899 100%);
+        background-size: 200% 200%;
+        animation: gradientText 5s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      @keyframes gradientText {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      
+      .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      
+      .floating-element {
+        position: absolute;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .floating-element:nth-child(1) {
+        width: 60px;
+        height: 60px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+      
+      .floating-element:nth-child(2) {
+        width: 40px;
+        height: 40px;
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+      }
+      
+      .floating-element:nth-child(3) {
+        width: 80px;
+        height: 80px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+      }
+      
+      .search-container {
+        position: relative;
+      }
+      
+      .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        pointer-events: none;
+      }
+      
+      .search-input {
+        padding-left: 48px;
+      }
+      
+      .filter-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      .filter-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      
+      .filter-btn.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-color: transparent;
+      }
+      
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        border-left: 4px solid #3b82f6;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .toast.show {
+        transform: translateX(0);
+      }
+      
+      .mobile-menu {
+        display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .mobile-menu {
+          display: block;
+        }
+        
+        .desktop-menu {
+          display: none;
+        }
+        
+        .hero-title {
+          font-size: 3rem;
+        }
+        
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .tokens-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-r from-slate-900/90 via-purple-900/80 to-slate-900/90 border-b border-purple-500/20 px-4 py-4 shadow-lg shadow-purple-500/10">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
+                <div class="logo-container animate-float">
+                    <svg class="logo-rocket" viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Pump Ton</h1>
+                    <p class="text-xs text-slate-400">TON Blockchain</p>
+              </div>
+              </div>
+            
+            <!-- Desktop Menu -->
+            <div class="desktop-menu hidden md:flex items-center space-x-2">
+                <button onclick="showPage('home')" class="nav-link active" id="nav-home">Главная</button>
+                <button onclick="showPage('create')" class="nav-link" id="nav-create">Создать</button>
+                <button onclick="showPage('streams')" class="nav-link" id="nav-streams">Стримы</button>
+                <button onclick="showPage('reels')" class="nav-link" id="nav-reels">Reels</button>
+                <button onclick="showPage('profile')" class="nav-link" id="nav-profile">Профиль</button>
+            </div>
+            
+            <!-- Right Side -->
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors">
+                    🌙
+              </button>
+                <!-- TON Connect button will render here -->
+                <div id="ton-connect-ui"></div>
+            </div>
+            </div>
+          </nav>
+
+    <!-- Main Content -->
+    <main class="relative">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <!-- Hero Section -->
+            <section class="relative overflow-hidden px-4 pt-16 pb-20">
+                <div class="max-w-7xl mx-auto text-center">
+                    <div class="inline-flex items-center gap-3 px-8 py-4 glass-card mb-8 animate-glow">
+                        <div class="w-8 h-8 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 rounded-full flex items-center justify-center animate-pulse">
+                            <span class="text-white text-lg">⭐</span>
+                        </div>
+                        <span class="text-white font-semibold text-lg bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">TON Blockchain Ecosystem</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-8xl font-bold mb-6 hero-gradient animate-gradient">
+                  Pump Ton
+                </h1>
+                    
+                    <p class="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+                        Создавай, торгуй и побеждай в мире мем-токенов на TON блокчейне
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+                        <button onclick="showPage('create')" class="btn-primary text-lg px-8 py-4 animate-glow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                  Создать токен
+                </button>
+                        <button onclick="showPage('streams')" class="btn-secondary text-lg px-8 py-4">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"></path>
+                            </svg>
+                            Смотреть стримы
+                </button>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                        <div class="stats-card glass-card-hover">
+                            <div class="text-3xl mb-3">💰</div>
+                            <div class="text-3xl font-bold gradient-text mb-2">$12.4M</div>
+                            <div class="text-slate-400">24ч Объем торгов</div>
+                        </div>
+                        <div class="stats-card glass-card-hover">
+                            <div class="text-3xl mb-3">👥</div>
+                            <div class="text-3xl font-bold gradient-text mb-2">45.2K</div>
+                            <div class="text-slate-400">Активных трейдеров</div>
+                        </div>
+                        <div class="stats-card glass-card-hover">
+                            <div class="text-3xl mb-3">🚀</div>
+                            <div class="text-3xl font-bold gradient-text mb-2">234</div>
+                            <div class="text-slate-400">Новых токенов</div>
+                        </div>
+                    </div>
+              </div>
+            </section>
+
+            <!-- Search and Filters -->
+            <section class="px-4 py-12">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
+                        <div class="search-container flex-1 max-w-md">
+                            <svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input type="text" placeholder="Поиск токенов..." class="input-field search-input" id="searchInput" onkeyup="filterTokens()">
+                </div>
+                        <div class="flex gap-3 flex-wrap">
+                            <button onclick="sortTokens('trending')" class="filter-btn active" data-sort="trending">🔥 Тренд</button>
+                            <button onclick="sortTokens('marketCap')" class="filter-btn" data-sort="marketCap">📊 Капитал</button>
+                            <button onclick="sortTokens('holders')" class="filter-btn" data-sort="holders">👥 Холдеры</button>
+                            <button onclick="sortTokens('volume')" class="filter-btn" data-sort="volume">📈 Объем</button>
+                          </div>
+                    </div>
+              </div>
+            </section>
+
+            <!-- Tokens List -->
+            <section class="px-4 pb-20">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-3xl font-bold text-white">Топ токены</h2>
+                        <div class="flex items-center gap-4">
+                            <span class="text-slate-400" id="tokenCount">3 токенов</span>
+                            <div class="loading-spinner hidden" id="loadingSpinner"></div>
+                        </div>
+                    </div>
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="tokensList">
+                        <!-- Tokens will be loaded here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Create Token Page -->
+        <div id="create" class="page">
+            <div class="min-h-screen py-16 px-4">
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-12">
+                        <div class="logo-container mx-auto mb-6 animate-float">
+                            <svg class="logo-rocket" viewBox="0 0 24 24">
+                                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-4xl font-bold text-white mb-4">Создать новый токен</h1>
+                        <p class="text-slate-400 text-lg">Запустите свой мем-токен на TON блокчейне</p>
+                    </div>
+                    
+                    <form onsubmit="createToken(event)" class="glass-card p-8 space-y-6">
+                          <div>
+                            <label class="block text-sm font-medium text-white mb-3">Название токена</label>
+                            <input type="text" id="tokenName" class="input-field" placeholder="Например: Pepe Rocket" required>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-white mb-3">Тикер</label>
+                            <input type="text" id="tokenTicker" class="input-field" placeholder="Например: PEPETON" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-white mb-3">Описание</label>
+                            <textarea id="tokenDescription" class="input-field h-24 resize-none" placeholder="Опишите ваш токен..."></textarea>
+                      </div>
+                        <div>
+                            <label class="block text-sm font-medium text-white mb-3">URL изображения</label>
+                            <input type="url" id="tokenImage" class="input-field" placeholder="https://example.com/image.png">
+                        </div>
+                        <div class="flex gap-4 pt-4">
+                            <button type="submit" class="btn-primary flex-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Создать токен
+                            </button>
+                            <button type="button" onclick="showPage('home')" class="btn-secondary flex-1">Отмена</button>
+                        </div>
+                    </form>
+                        </div>
+                      </div>
+                    </div>
+
+        <!-- Streams Page -->
+        <div id="streams" class="page">
+            <div class="min-h-screen py-16 px-4">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center mb-12">
+                        <h1 class="text-4xl font-bold text-white mb-4">Прямые трансляции</h1>
+                        <p class="text-slate-400 text-lg">Смотрите анализ токенов в реальном времени</p>
+                </div>
+                    
+                    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        <div class="glass-card p-6 cursor-pointer glass-card-hover">
+                            <div class="aspect-video bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl mb-6 flex items-center justify-center text-6xl">
+                                🔥
+              </div>
+                            <h3 class="text-xl font-semibold text-white mb-3">PEPETON анализ и прогнозы</h3>
+                            <div class="flex items-center justify-between text-sm text-slate-400">
+                                <span class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
+                                    CryptoKing
+                                </span>
+                                <span>1,240 зрителей</span>
+          </div>
+                        </div>
+                        
+                        <div class="glass-card p-6 cursor-pointer glass-card-hover">
+                            <div class="aspect-video bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl mb-6 flex items-center justify-center text-6xl">
+                                📈
+                            </div>
+                            <h3 class="text-xl font-semibold text-white mb-3">Новые токены на TON</h3>
+                            <div class="flex items-center justify-between text-sm text-slate-400">
+                                <span class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
+                                    Memelord
+                                </span>
+                                <span>892 зрителей</span>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card p-6 cursor-pointer glass-card-hover">
+                            <div class="aspect-video bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl mb-6 flex items-center justify-center text-6xl">
+                                💎
+                    </div>
+                            <h3 class="text-xl font-semibold text-white mb-3">DeFi стратегии</h3>
+                            <div class="flex items-center justify-between text-sm text-slate-400">
+                                <span class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
+                                    DeFiMaster
+                                </span>
+                                <span>1,567 зрителей</span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                </div>
+              </div>
+              
+        <!-- Reels Page -->
+        <div id="reels" class="page">
+            <div class="min-h-screen bg-slate-900 flex items-center justify-center">
+                <div class="text-center text-white">
+                    <div class="logo-container mx-auto mb-8 animate-float">
+                        <svg class="logo-rocket" viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-5xl font-bold mb-6">🎬 Reels</h1>
+                    <p class="text-slate-400 text-xl mb-12">Короткие видео о токенах</p>
+                    <div class="w-80 h-80 glass-card mx-auto flex items-center justify-center text-8xl animate-glow">
+                        📹
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profile" class="page">
+            <div class="min-h-screen py-16 px-4">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-12">
+                        <div class="logo-container mx-auto mb-6 animate-float">
+                            <svg class="logo-rocket" viewBox="0 0 24 24">
+                                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-4xl font-bold text-white mb-4">👤 Профиль</h1>
+                        <p class="text-slate-400 text-lg">Управление аккаунтом и настройки</p>
+              </div>
+              
+                    <div class="glass-card p-8">
+                        <h2 class="text-2xl font-bold text-white mb-8">Настройки профиля</h2>
+                        <div class="space-y-6">
+                  <div>
+                                <label class="block text-sm font-medium text-white mb-3">Имя пользователя</label>
+                                <input type="text" class="input-field" placeholder="Введите имя пользователя">
+                            </div>
+                      <div>
+                                <label class="block text-sm font-medium text-white mb-3">Email</label>
+                                <input type="email" class="input-field" placeholder="Введите email">
+                      </div>
+                      <div>
+                                <label class="block text-sm font-medium text-white mb-3">TON Wallet</label>
+                                <input type="text" class="input-field" placeholder="Адрес кошелька">
+                      </div>
+                            <button class="btn-primary">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Сохранить изменения
+                      </button>
+                            <div class="pt-6 border-t border-slate-700/50">
+                                <h3 class="text-lg font-semibold text-white mb-3">Вход через Google</h3>
+                                <div id="google-signin-container"></div>
+                                <button id="google-fallback-btn" class="btn-secondary hidden mt-3" type="button" onclick="showToast('Добавьте Google Client ID в APP_CONFIG для включения входа')">Войти через Google</button>
+                    </div>
+                  </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <div class="loading-spinner"></div>
+            <span id="toastMessage">Уведомление</span>
+                    </div>
+                  </div>
+
+    <script>
+        // Mock data
+        const mockTokens = [
+            {
+                id: '1',
+                name: 'Pepe Rocket',
+                ticker: 'PEPETON',
+                price: 0.0234,
+                change24h: 125.4,
+                marketCap: 1250000,
+                volume: 450000,
+                holders: 3420,
+                trending: true,
+                auditPassed: true,
+                likes: 3420,
+                image: '🚀'
+            },
+            {
+                id: '2',
+                name: 'Moon Doge',
+                ticker: 'MDOGE',
+                price: 0.0876,
+                change24h: -15.2,
+                marketCap: 890000,
+                volume: 320000,
+                holders: 2150,
+                trending: false,
+                auditPassed: false,
+                likes: 1890,
+                image: '🐕'
+            },
+            {
+                id: '3',
+                name: 'Shiba TON',
+                ticker: 'SHITON',
+                price: 0.156,
+                change24h: 67.8,
+                marketCap: 2100000,
+                volume: 780000,
+                holders: 5670,
+                trending: true,
+                auditPassed: true,
+                likes: 8920,
+                image: '🦊'
+            },
+            {
+                id: '4',
+                name: 'Chad Token',
+                ticker: 'CHAD',
+                price: 0.234,
+                change24h: 12.3,
+                marketCap: 1560000,
+                volume: 540000,
+                holders: 4230,
+                trending: false,
+                auditPassed: true,
+                likes: 4560,
+                image: '💪'
+            },
+            {
+                id: '5',
+                name: 'Gigachad',
+                ticker: 'GIGA',
+                price: 0.089,
+                change24h: -8.4,
+                marketCap: 430000,
+                volume: 180000,
+                holders: 980,
+                trending: false,
+                auditPassed: true,
+                likes: 890,
+                image: '🏆'
+            },
+            {
+                id: '6',
+                name: 'Wojak Finance',
+                ticker: 'WOJAK',
+                price: 0.0045,
+                change24h: 234.5,
+                marketCap: 670000,
+                volume: 290000,
+                holders: 1890,
+                trending: true,
+                auditPassed: false,
+                likes: 2340,
+                image: '😢'
+            }
+        ];
+
+        let currentTokens = [...mockTokens];
+        let currentSort = 'trending';
+
+        // Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('nav-' + pageId).classList.add('active');
+            
+            // Load tokens if home page
+            if (pageId === 'home') {
+                loadTokens();
+            }
+        }
+
+        // Load tokens
+        async function loadTokens() {
+            const tokensList = document.getElementById('tokensList');
+            const tokenCount = document.getElementById('tokenCount');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Show loading
+            loadingSpinner.classList.remove('hidden');
+            tokensList.innerHTML = '';
+            
+            try {
+                // Пробуем загрузить из backend
+                const result = await APIClient.getTokens({ 
+                    sort: currentSort,
+                    limit: 50
+                });
+                
+                if (result.success && result.tokens) {
+                    currentTokens = result.tokens;
+                } else {
+                    // Fallback на mock data
+                    console.warn('Using mock data');
+                    currentTokens = [...mockTokens];
+                }
+            } catch (error) {
+                console.error('Load tokens error:', error);
+                // Fallback на mock data
+                currentTokens = [...mockTokens];
+                NotificationService.warning('Используются демо-данные. Запустите backend для реальных токенов.');
+            }
+            
+            loadingSpinner.classList.add('hidden');
+            tokenCount.textContent = `${currentTokens.length} токенов`;
+            
+            currentTokens.forEach((token, index) => {
+                    const tokenCard = document.createElement('div');
+                    tokenCard.className = 'token-card';
+                    tokenCard.setAttribute('data-token-id', token.id);
+                    tokenCard.style.animationDelay = `${index * 0.1}s`;
+                    tokenCard.innerHTML = `
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-2xl">
+                                    ${token.image}
+              </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-white flex items-center gap-2 mb-1">
+                                        ${token.name}
+                                        ${token.auditPassed ? '<span class="text-blue-400 text-sm">✓</span>' : ''}
+                                        ${token.trending ? '<span class="text-orange-400 text-sm">🔥</span>' : ''}
+                                    </h3>
+                                    <p class="text-slate-400">${token.ticker}</p>
+            </div>
+          </div>
+                            <div class="text-right">
+                                <div class="token-price text-lg font-bold text-white mb-1">$${token.price.toFixed(4)}</div>
+                                <div class="token-change text-sm ${token.change24h > 0 ? 'text-green-400' : 'text-red-400'}">
+                                    ${token.change24h > 0 ? '+' : ''}${token.change24h.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="text-center p-3 bg-slate-800/50 rounded-lg">
+                                <div class="text-xs text-slate-400 mb-1">Капитализация</div>
+                                <div class="text-sm font-semibold text-white">$${(token.marketCap / 1000).toFixed(0)}K</div>
+                            </div>
+                            <div class="text-center p-3 bg-slate-800/50 rounded-lg">
+                                <div class="text-xs text-slate-400 mb-1">Холдеры</div>
+                                <div class="text-sm font-semibold text-white">${token.holders.toLocaleString()}</div>
+                            </div>
+                            <div class="text-center p-3 bg-slate-800/50 rounded-lg">
+                                <div class="text-xs text-slate-400 mb-1">Объем 24ч</div>
+                                <div class="text-sm font-semibold text-white">$${(token.volume / 1000).toFixed(0)}K</div>
+                            </div>
+                            <div class="text-center p-3 bg-slate-800/50 rounded-lg">
+                                <div class="text-xs text-slate-400 mb-1">Лайки</div>
+                                <div class="text-sm font-semibold text-white">${token.likes}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                                    token.change24h > 50 ? 'bg-green-500/20 text-green-400' :
+                                    token.change24h > 0 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                                }">
+                                    ${token.change24h > 50 ? 'Низкий риск' : token.change24h > 0 ? 'Средний риск' : 'Высокий риск'}
+                                </span>
+                                ${token.auditPassed ? '<span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">Аудит ✓</span>' : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="tradeToken('${token.id}', 'buy')" class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-green-800 transition-all">
+                                    💰 Купить
+                                </button>
+                                <button onclick="tradeToken('${token.id}', 'sell')" class="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-700 text-white rounded-lg text-sm font-medium hover:from-orange-600 hover:to-orange-800 transition-all">
+                                    💸 Продать
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    tokensList.appendChild(tokenCard);
+                    
+                    // Подписываемся на обновления цены токена
+                    subscribeToToken(token.id);
+                });
+        }
+
+        // Filter tokens
+        function filterTokens() {
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput.value.toLowerCase();
+            
+            currentTokens = mockTokens.filter(token => 
+                token.name.toLowerCase().includes(searchQuery) ||
+                token.ticker.toLowerCase().includes(searchQuery)
+            );
+            
+            loadTokens();
+        }
+
+        // Sort tokens
+        function sortTokens(sortBy) {
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-sort="${sortBy}"]`).classList.add('active');
+            
+            currentSort = sortBy;
+            
+            // Sort tokens
+            currentTokens.sort((a, b) => {
+                switch (sortBy) {
+                    case 'trending':
+                        return b.trending - a.trending || b.change24h - a.change24h;
+                    case 'marketCap':
+                        return b.marketCap - a.marketCap;
+                    case 'holders':
+                        return b.holders - a.holders;
+                    case 'volume':
+                        return b.volume - a.volume;
+            default:
+                        return b.change24h - a.change24h;
+                }
+            });
+            
+            loadTokens();
+        }
+
+        // Create token
+        async function createToken(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('tokenName').value;
+            const ticker = document.getElementById('tokenTicker').value;
+            const description = document.getElementById('tokenDescription').value;
+            const image = document.getElementById('tokenImage').value;
+            
+            if (!name || !ticker) {
+                NotificationService.error('Заполните все обязательные поля');
+                return;
+            }
+
+            // Проверка подключения кошелька
+            if (!window.tonConnectUI || !window.tonConnectUI.wallet) {
+                NotificationService.warning('Подключите TON кошелек для создания токена');
+                return;
+            }
+            
+            try {
+                const ownerAddress = window.tonConnectUI.wallet.account.address;
+                
+                // Шаг 1: Подготовка создания токена и расчёт комиссии
+                NotificationService.show('Расчёт стоимости создания токена...', 'info');
+                
+                const prepareResult = await APIClient.request('/api/tokens/prepare-creation', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name,
+                        symbol: ticker,
+                        description,
+                        image,
+                        ownerAddress
+                    })
+                });
+                
+                if (!prepareResult.success) {
+                    throw new Error(prepareResult.error);
+                }
+                
+                const { tokenId, paymentRequired } = prepareResult;
+                const fee = paymentRequired.feeBreakdown;
+                
+                // Показываем детали оплаты
+                NotificationService.show(
+                    `Стоимость: ${fee.totalFee.toFixed(4)} TON (~$${fee.totalFeeUSD.toFixed(2)})\n` +
+                    `Комиссия платформы: $${fee.platformFeeUSD.toFixed(2)}`,
+                    'info',
+                    10000
+                );
+                
+                console.log('💰 Детализация комиссии:');
+                console.log('   Затраты на деплой:', fee.costs.total.toFixed(4), 'TON');
+                console.log('   Комиссия платформы:', fee.platformFee.toFixed(4), 'TON', `($${fee.platformFeeUSD.toFixed(2)})`);
+                console.log('   ИТОГО:', fee.totalFee.toFixed(4), 'TON', `($${fee.totalFeeUSD.toFixed(2)})`);
+                
+                // Шаг 2: Отправка платежа через TON Connect
+                NotificationService.show('Подтвердите оплату в кошельке...', 'info', 5000);
+                
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 600,
+                    messages: [
+                        {
+                            address: paymentRequired.transactions[0].to,
+                            amount: paymentRequired.transactions[0].amount,
+                            payload: paymentRequired.transactions[0].payload || ''
+                        }
+                    ]
+                };
+                
+                const txResult = await window.tonConnectUI.sendTransaction(transaction);
+                
+                console.log('✅ Транзакция отправлена:', txResult.boc);
+                
+                // Шаг 3: Подтверждение оплаты и создание токена
+                NotificationService.show('Подтверждение оплаты и создание токена...', 'info', 5000);
+                
+                // В production: получите txHash из txResult.boc
+                const txHash = 'mock_' + Date.now(); // Mock hash
+                
+                const createResult = await APIClient.request('/api/tokens/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        tokenId,
+                        txHash,
+                        ownerAddress
+                    })
+                });
+                
+                if (createResult.success) {
+                    NotificationService.success(
+                        `Токен "${name}" (${ticker}) создан! 🚀\n` +
+                        `Вы заплатили: ${fee.totalFee.toFixed(4)} TON ($${fee.totalFeeUSD.toFixed(2)})`
+                    );
+                    console.log('🎉 Token created:', createResult.token);
+                    console.log('💵 Platform revenue:', createResult.revenue);
+                    
+                    // Подписываемся на обновления цены токена
+                    subscribeToToken(createResult.token.id);
+                    
+                    setTimeout(() => {
+                        showPage('home');
+                        // Reset form
+                        document.getElementById('tokenName').value = '';
+                        document.getElementById('tokenTicker').value = '';
+                        document.getElementById('tokenDescription').value = '';
+                        document.getElementById('tokenImage').value = '';
+                        
+                        // Перезагружаем список токенов
+                        loadTokens();
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('Token creation error:', error);
+                if (error.message && error.message.includes('User rejected')) {
+                    NotificationService.warning('Транзакция отклонена пользователем');
+                } else {
+                    NotificationService.error('Ошибка создания токена: ' + (error.message || 'Неизвестная ошибка'));
+                }
+            }
+        }
+
+        // Trade token
+        async function tradeToken(tokenId, action) {
+            if (!window.tonConnectUI || !window.tonConnectUI.wallet) {
+                NotificationService.warning('Подключите TON кошелек для торговли');
+                return;
+            }
+
+            const walletAddress = window.tonConnectUI.wallet.account.address;
+
+            try {
+                if (action === 'buy') {
+                    // Prompt для суммы
+                    const amount = prompt('Введите сумму TON для покупки:', '1');
+                    if (!amount || parseFloat(amount) <= 0) return;
+
+                    NotificationService.show(`Покупка токена...`, 'info', 5000);
+                    
+                    const result = await APIClient.buyToken(tokenId, amount, walletAddress);
+                    
+                    if (result.success) {
+                        NotificationService.success(result.message || `Куплено! 🎉`);
+                        console.log('Buy trade:', result.trade);
+                        
+                        // Перезагружаем токены
+                        loadTokens();
+                    }
+                } else if (action === 'sell') {
+                    const amount = prompt('Введите количество токенов для продажи:', '100');
+                    if (!amount || parseFloat(amount) <= 0) return;
+
+                    NotificationService.show(`Продажа токена...`, 'info', 5000);
+                    
+                    const result = await APIClient.sellToken(tokenId, amount, walletAddress);
+                    
+                    if (result.success) {
+                        NotificationService.success(result.message || `Продано! 💰`);
+                        console.log('Sell trade:', result.trade);
+                        
+                        // Перезагружаем токены
+                        loadTokens();
+                    }
+                }
+            } catch (error) {
+                console.error('Trade error:', error);
+                NotificationService.error('Ошибка торговли: ' + (error.message || 'Неизвестная ошибка'));
+            }
+        }
+
+        // App config (можно переопределить до загрузки скрипта)
+        window.APP_CONFIG = window.APP_CONFIG || {
+            tonManifestUrl: './tonconnect-manifest.json',
+            googleClientId: '757831305455-52em4gttq38qfj8k2l14lgicflheugie.apps.googleusercontent.com',
+            tonCenterApiKey: '', // Опционально: получите на toncenter.com
+            tonCenterUrl: 'https://toncenter.com/api/v2',
+            // Backend URL автоматически определяется
+            backendUrl: window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : window.location.hostname.includes('railway')
+                    ? 'https://your-app.up.railway.app' // Railway backend
+                    : 'https://your-backend-url.com', // Или ваш custom домен
+            wsUrl: window.location.hostname === 'localhost'
+                ? 'ws://localhost:3001'
+                : window.location.hostname.includes('railway')
+                    ? 'wss://your-app.up.railway.app'
+                    : 'wss://your-backend-url.com'
+        };
+
+        // API Client
+        const APIClient = {
+            async request(endpoint, options = {}) {
+                const url = `${window.APP_CONFIG.backendUrl}${endpoint}`;
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                const data = await response.json();
+                if (!data.success && response.status >= 400) {
+                    throw new Error(data.error || 'API request failed');
+                }
+                return data;
+            },
+
+            async createToken(params) {
+                return this.request('/api/tokens/create', {
+                    method: 'POST',
+                    body: JSON.stringify(params)
+                });
+            },
+
+            async getTokens(params = {}) {
+                const query = new URLSearchParams(params).toString();
+                return this.request(`/api/tokens${query ? '?' + query : ''}`);
+            },
+
+            async getToken(id) {
+                return this.request(`/api/tokens/${id}`);
+            },
+
+            async buyToken(id, amount, buyerAddress) {
+                return this.request(`/api/tokens/${id}/buy`, {
+                    method: 'POST',
+                    body: JSON.stringify({ amount, buyerAddress })
+                });
+            },
+
+            async sellToken(id, amount, sellerAddress) {
+                return this.request(`/api/tokens/${id}/sell`, {
+                    method: 'POST',
+                    body: JSON.stringify({ amount, sellerAddress })
+                });
+            },
+
+            async getTrades(tokenId) {
+                const query = tokenId ? `?tokenId=${tokenId}` : '';
+                return this.request(`/api/trades${query}`);
+            }
+        };
+
+        // WebSocket for Real-Time Updates
+        let wsClient = null;
+
+        function initWebSocket() {
+            try {
+                if (typeof io === 'undefined') {
+                    console.warn('Socket.IO not loaded, real-time updates disabled');
+                    return;
+                }
+
+                wsClient = io(window.APP_CONFIG.backendUrl);
+
+                wsClient.on('connect', () => {
+                    console.log('✅ WebSocket connected');
+                    NotificationService.show('Подключено к real-time обновлениям', 'success');
+                });
+
+                wsClient.on('disconnect', () => {
+                    console.log('❌ WebSocket disconnected');
+                });
+
+                wsClient.on('price_update', (data) => {
+                    console.log('Price update:', data);
+                    // Обновляем цену токена в UI
+                    updateTokenPrice(data);
+                });
+
+                wsClient.on('error', (error) => {
+                    console.error('WebSocket error:', error);
+                });
+
+            } catch (e) {
+                console.error('WebSocket init error:', e);
+            }
+        }
+
+        function subscribeToToken(tokenId) {
+            if (wsClient && wsClient.connected) {
+                wsClient.emit('subscribe_token', tokenId);
+            }
+        }
+
+        function updateTokenPrice(data) {
+            // Находим карточку токена и обновляем цену
+            const tokenCard = document.querySelector(`[data-token-id="${data.tokenId}"]`);
+            if (tokenCard) {
+                const priceElement = tokenCard.querySelector('.token-price');
+                const changeElement = tokenCard.querySelector('.token-change');
+                if (priceElement) {
+                    priceElement.textContent = `$${data.price.toFixed(6)}`;
+                }
+                if (changeElement) {
+                    changeElement.textContent = `${data.change24h > 0 ? '+' : ''}${data.change24h.toFixed(1)}%`;
+                    changeElement.className = `token-change text-sm ${data.change24h > 0 ? 'text-green-400' : 'text-red-400'}`;
+                }
+            }
+        }
+
+        // TON Blockchain Integration
+        const TONService = {
+            client: null,
+            
+            async init() {
+                try {
+                    // Инициализация TON Client
+                    if (window.TonWeb) {
+                        this.client = new window.TonWeb(new window.TonWeb.HttpProvider(
+                            window.APP_CONFIG.tonCenterUrl,
+                            { apiKey: window.APP_CONFIG.tonCenterApiKey }
+                        ));
+                        console.log('✅ TON Client initialized');
+                    }
+                } catch (e) {
+                    console.error('TON Client init error:', e);
+                }
+            },
+
+            async getWalletAddress() {
+                if (!window.tonConnectUI || !window.tonConnectUI.wallet) {
+                    throw new Error('Wallet not connected');
+                }
+                return window.tonConnectUI.wallet.account.address;
+            },
+
+            async getBalance(address) {
+                try {
+                    if (!this.client) await this.init();
+                    const balance = await this.client.getBalance(address);
+                    return window.TonWeb.utils.fromNano(balance);
+                } catch (e) {
+                    console.error('Get balance error:', e);
+                    return '0';
+                }
+            },
+
+            async createJetton(params) {
+                const { name, symbol, totalSupply, description, image } = params;
+                
+                try {
+                    const walletAddress = await this.getWalletAddress();
+                    
+                    // Создаём payload для деплоя Jetton Minter
+                    const jettonMinterCode = await this.getJettonMinterCode();
+                    const jettonWalletCode = await this.getJettonWalletCode();
+                    
+                    // Параметры Jetton
+                    const jettonParams = {
+                        owner: walletAddress,
+                        name: name,
+                        symbol: symbol,
+                        decimals: 9,
+                        totalSupply: totalSupply || '1000000000', // 1B по умолчанию
+                        description: description || '',
+                        image: image || ''
+                    };
+
+                    // Создаём транзакцию через TON Connect
+                    const transaction = {
+                        validUntil: Math.floor(Date.now() / 1000) + 600, // 10 минут
+                        messages: [
+                            {
+                                address: '0:0000000000000000000000000000000000000000000000000000000000000000', // Будет заменён на адрес деплоя
+                                amount: '50000000', // 0.05 TON на газ
+                                payload: await this.buildJettonDeployPayload(jettonParams)
+                            }
+                        ]
+                    };
+
+                    // Отправка через TON Connect
+                    const result = await window.tonConnectUI.sendTransaction(transaction);
+                    
+                    return {
+                        success: true,
+                        boc: result.boc,
+                        params: jettonParams
+                    };
+                } catch (e) {
+                    console.error('Create Jetton error:', e);
+                    throw e;
+                }
+            },
+
+            async buildJettonDeployPayload(params) {
+                // Simplified: в реальном проекте используйте jetton-minter contract
+                const cell = new window.TonWeb.boc.Cell();
+                cell.bits.writeUint(0, 32); // op: deploy
+                cell.bits.writeString(params.name);
+                cell.bits.writeString(params.symbol);
+                return window.TonWeb.utils.bytesToBase64(await cell.toBoc());
+            },
+
+            async getJettonMinterCode() {
+                // Placeholder: загрузите реальный код контракта
+                return 'te6ccgEBBwEA...'; // Base64 BOC
+            },
+
+            async getJettonWalletCode() {
+                // Placeholder: загрузите реальный код контракта
+                return 'te6ccgEBBwEA...'; // Base64 BOC
+            },
+
+            async getJettonInfo(jettonAddress) {
+                try {
+                    // Получение данных о Jetton через API
+                    const response = await fetch(
+                        `${window.APP_CONFIG.tonCenterUrl}/getAddressInformation?address=${jettonAddress}`
+                    );
+                    const data = await response.json();
+                    return data.result;
+                } catch (e) {
+                    console.error('Get Jetton info error:', e);
+                    return null;
+                }
+            }
+        };
+
+        // Trading System
+        const TradingService = {
+            async buyToken(tokenAddress, amountTON) {
+                try {
+                    const walletAddress = await TONService.getWalletAddress();
+                    
+                    const transaction = {
+                        validUntil: Math.floor(Date.now() / 1000) + 600,
+                        messages: [
+                            {
+                                address: tokenAddress,
+                                amount: (parseFloat(amountTON) * 1e9).toString(), // TON в nanoTON
+                                payload: await this.buildSwapPayload('buy')
+                            }
+                        ]
+                    };
+
+                    const result = await window.tonConnectUI.sendTransaction(transaction);
+                    return { success: true, boc: result.boc };
+                } catch (e) {
+                    console.error('Buy token error:', e);
+                    throw e;
+                }
+            },
+
+            async sellToken(tokenAddress, amount) {
+                try {
+                    const walletAddress = await TONService.getWalletAddress();
+                    
+                    const transaction = {
+                        validUntil: Math.floor(Date.now() / 1000) + 600,
+                        messages: [
+                            {
+                                address: tokenAddress,
+                                amount: '10000000', // 0.01 TON на газ
+                                payload: await this.buildSwapPayload('sell', amount)
+                            }
+                        ]
+                    };
+
+                    const result = await window.tonConnectUI.sendTransaction(transaction);
+                    return { success: true, boc: result.boc };
+                } catch (e) {
+                    console.error('Sell token error:', e);
+                    throw e;
+                }
+            },
+
+            async buildSwapPayload(action, amount = 0) {
+                const cell = new window.TonWeb.boc.Cell();
+                cell.bits.writeUint(action === 'buy' ? 1 : 2, 32); // op: buy/sell
+                if (amount > 0) {
+                    cell.bits.writeUint(amount, 64);
+                }
+                return window.TonWeb.utils.bytesToBase64(await cell.toBoc());
+            },
+
+            async getTokenPrice(tokenAddress) {
+                // Симуляция: в реальности запрос к DEX API или on-chain
+                const basePrice = Math.random() * 0.5;
+                return basePrice.toFixed(6);
+            }
+        };
+
+        // Notification System
+        const NotificationService = {
+            show(message, type = 'info', duration = 3000) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                // Обновляем стиль в зависимости от типа
+                toast.style.borderLeftColor = 
+                    type === 'success' ? '#10b981' :
+                    type === 'error' ? '#ef4444' :
+                    type === 'warning' ? '#f59e0b' : '#3b82f6';
+                
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, duration);
+            },
+
+            success(message) {
+                this.show(message, 'success');
+            },
+
+            error(message) {
+                this.show(message, 'error');
+            },
+
+            warning(message) {
+                this.show(message, 'warning');
+            }
+        };
+
+        // Toggle theme
+        function toggleTheme() {
+            const button = event.target;
+            if (button.textContent === '🌙') {
+                button.textContent = '☀️';
+                document.body.classList.add('dark');
+            } else {
+                button.textContent = '🌙';
+                document.body.classList.remove('dark');
+            }
+        }
+
+        // Show toast (deprecated, используйте NotificationService)
+        function showToast(message, type = 'info') {
+            NotificationService.show(message, type);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            loadTokens();
+            console.log('✅ Pump Ton загружен успешно!');
+            
+            // TON Service init
+            try {
+                await TONService.init();
+                console.log('✅ TON Service инициализирован');
+            } catch (e) {
+                console.error('TON Service init error:', e);
+            }
+            
+            // WebSocket init
+            try {
+                initWebSocket();
+            } catch (e) {
+                console.error('WebSocket init error:', e);
+            }
+            
+            // TON Connect UI init
+            try {
+                if (window.TON_CONNECT_UI) {
+                    window.tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                        manifestUrl: window.APP_CONFIG.tonManifestUrl,
+                        buttonRootId: 'ton-connect-ui'
+                    });
+                    window.tonConnectUI.uiOptions = { twaReturnUrl: '/' };
+                    window.tonConnectUI.onStatusChange(async wallet => {
+                        if (wallet && wallet.account) {
+                            const addr = wallet.account.address;
+                            const short = addr.slice(0, 6) + '…' + addr.slice(-4);
+                            NotificationService.success('Кошелек подключен: ' + short);
+                            
+                            // Получаем баланс
+                            try {
+                                const balance = await TONService.getBalance(addr);
+                                console.log('Баланс кошелька:', balance, 'TON');
+                            } catch (e) {
+                                console.error('Get balance error:', e);
+                            }
+                        } else {
+                            NotificationService.show('Кошелек отключен', 'warning');
+                        }
+                    });
+                    console.log('✅ TON Connect UI инициализирован');
+                }
+            } catch (e) {
+                console.error('TON Connect init error', e);
+                NotificationService.error('Ошибка инициализации TON Connect');
+            }
+
+            // Google Sign-In init
+            try {
+                if (window.APP_CONFIG.googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.initialize({
+                        client_id: window.APP_CONFIG.googleClientId,
+                        callback: (response) => {
+                            NotificationService.success('Google вход выполнен! ✅');
+                            console.log('Google JWT:', response.credential);
+                            // Здесь можно отправить JWT на бэкенд для верификации
+                        }
+                    });
+                    window.google.accounts.id.renderButton(
+                        document.getElementById('google-signin-container'),
+                        { theme: 'outline', size: 'large', shape: 'pill' }
+                    );
+                    console.log('✅ Google Sign-In инициализирован');
+                } else {
+                    document.getElementById('google-fallback-btn').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.warn('Google Sign-In init error', e);
+                document.getElementById('google-fallback-btn').classList.remove('hidden');
+            }
+            
+            // Add some interactive effects
+            document.querySelectorAll('.token-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showPage('home');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showPage('create');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showPage('streams');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
